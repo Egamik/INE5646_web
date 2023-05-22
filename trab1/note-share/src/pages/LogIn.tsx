@@ -1,16 +1,21 @@
 import { FormEvent, useState } from "react"
 import axios from "axios"
 
+// Inherit setState
 type Props = {
-    setToken: React.Dispatch<React.SetStateAction<any>>
+    setToken: React.Dispatch<React.SetStateAction<Object>>
 }
+
+// Axios call
 async function sendLogIn(creds: object) {
     return axios.post(
         'http://localhost:8080/login',
         creds
     )
 }
-export default function Login(setToken: Props) {
+
+// Login page component
+export default function Login(props: Props) {
     const [username, setUsername] = useState<string>()
     const [password, setPassword] = useState<string>()
 
@@ -19,9 +24,8 @@ export default function Login(setToken: Props) {
         const token = await sendLogIn({
             usr: username,
             pw: password
-        }).then(() => {
-            setToken(token)
         })
+        props.setToken(token)
     }
 
     return (

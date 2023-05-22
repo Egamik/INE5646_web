@@ -6,3 +6,4 @@ Implementacao app gerenciamento de tarefas
   - Página para adicionar, modificar e compartilhar tarefas
   - Página de tarefas concluidas
   - Back end em servidor UFSC
+

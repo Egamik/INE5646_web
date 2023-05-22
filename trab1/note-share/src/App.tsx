@@ -6,15 +6,24 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
+import { useState } from "react"
 // Components
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"
 // Pages
 import Home from "./pages/Home.tsx"
+import Login from "./pages/LogIn.tsx"
 
 
 export default function App() {
-
+    const [token, setToken] = useState<Object>()
+    
+    if (!token) {
+        return (
+            <Login setToken={setToken} />
+        )
+    }
+    
     return (
         <Router>
             <header>
