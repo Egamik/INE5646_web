@@ -7,6 +7,7 @@ const consign = require('consign');
 
 module.exports = () => {
     const app = express();
+    app.use(express.json());
 
     // Sets enviroment variables.
     app.set('port', process.env.PORT || config.get('server.port'));
