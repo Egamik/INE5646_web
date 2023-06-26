@@ -1,5 +1,7 @@
-import { FormEvent, useState } from "react"
+import { ChangeEvent, FormEvent, useState } from "react"
 import axios from "axios"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faUser } from "@fortawesome/free-solid-svg-icons"
 
 // Inherit setState
 type Props = {
@@ -20,38 +22,39 @@ export default function Login(props: Props) {
     const [password, setPassword] = useState<string>()
 
     const handleSubmit = async (e: FormEvent) => {
+        console.log('alo')
         e.preventDefault()
         const token = await sendLogIn({
             usr: username,
             pw: password
         })
+        console.log('Enviou token: ', token)
         props.setToken(token)
     }
 
     return (
         <form onSubmit={handleSubmit}>
-            <label>
-                <p>Usuário</p>
-                <input 
-                    type="text"
-                    onChange={e => setUsername(e.target.value)}
-                />
-            </label>
-            <label>
-                <p>Senha</p>
-                <input 
-                    type="password"
-                    onChange={e => setPassword(e.target.value)}    
-                />
-            </label>
             <div>
-                <br-sign-in 
-                    type="primary"
-                    density="middle"
-                    icon="fa-user"
-                    label="Entrar"
-                />
+                <br-input
+                    label="Usuário"
+                    placeholder="Digite seu usuário"
+                    id="user"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                ></br-input>
+                <br-input
+                    label="Senha"
+                    placeholder="Digite sua senha"
+                    id="password"
+                    ispassword="true"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                ></br-input>
             </div>
+            <button
+                type="submit"
+            >
+                <FontAwesomeIcon icon={faUser} />
+                Entrar
+            </button>
         </form>
     )
 }

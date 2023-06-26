@@ -20,4 +20,14 @@ declare namespace JSX {
         "br-header-action-link": any;
         "br-sign-in": any;
     }
+
+}
+
+interface APINote {
+    title: string,
+    body: string,
+    id: numeber
+}
+interface APIResponse {
+    noteList: APINote[];
 }
