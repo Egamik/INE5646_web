@@ -11,17 +11,18 @@ import { useState } from "react"
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"
 // Pages
-import Home from "./pages/Home.tsx"
 import Login from "./pages/LogIn.tsx"
+import MainPage from "./pages/MainPage.tsx"
+import AddNote from "./pages/AddNote.tsx"
 
 
 export default function App() {
     const [token, setToken] = useState<Object>()
     
     if (!token) {
-        return (
-            <Login setToken={setToken} />
-        )
+        // return (
+        //     <Login setToken={setToken} />
+        // )
     }
     
     return (
@@ -40,8 +41,12 @@ export default function App() {
                                 <Routes>
                                     <Route
                                         path="/"
-                                        element={<Home />}
+                                        element={<MainPage />}
                                         errorElement={<></>}
+                                    />
+                                    <Route 
+                                        path="/addnote"
+                                        element={<AddNote />}
                                     />
                                 </Routes>
                             </div>

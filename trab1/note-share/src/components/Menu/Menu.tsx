@@ -4,13 +4,13 @@ const Menu = () => {
             id: 1,
             icon: "home",
             name: "Página Inicial",
-            url: "/home",
+            url: "/",
         },
         {
-            id: 3,
+            id: 2,
             icon: "users-cog",
-            name: "Usuário",
-            url: "/usuario",
+            name: "Add Note",
+            url: "/addnote",
         },
     ];
 
