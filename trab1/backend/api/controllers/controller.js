@@ -30,12 +30,28 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+const noteSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        required: true,
+        default: "aberto"
+    }
+});
+
 const groupSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
-    notes: []
+    notes: [noteSchema]
 });
 
 const groupUserSchema = new mongoose.Schema({
@@ -73,13 +89,6 @@ const Auth = mongoose.model('auth', AuthSchema);
 module.exports = () => {
     const controller = {}
 
-    controller.writeUser = async(req, res, next) => {
-        try {
-            //
-        } catch(err) {
-            console.log(err)
-        }
-    }
     controller.logIn = async(req, res, next) => {
         res.status(200).json({
             token: 'mockToken'
@@ -133,7 +142,18 @@ module.exports = () => {
                 .then(() => {return res.status(200).json({msg: 'Usuário atualizado!'})})
                 .catch(() => {return res.status(500).json({msg: 'Erro ao atualizar usuário!'})});
         } catch (error) {
-            return res.status(500).json({msg: 'Erro ao atualizar usuário!'});
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao atualizar usuário.'});
+        }
+    }
+
+    controller.deleteUser = async(req, res) => {
+        try {
+            User.deleteOne({user_id: req.body.user_id});
+            return res.status(200).json({msg: 'Usuário removido!.'});
+        } catch (error) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao atualizar usuário.'});
         }
     }
 
@@ -141,7 +161,7 @@ module.exports = () => {
         try {
             const newGroup = new Group({
                 name: req.body.name,
-                notes: req.body.notes
+                notes: []
             });
             newGroup.save();
 
@@ -155,16 +175,161 @@ module.exports = () => {
             
             return res.status(200).json({msg: 'Grupo cadastrado!'});
         } catch (err) {
-            console.log('Erro ao cadastrar grupo: ' + err);
+            console.log(err);
             return res.status(500).json({msg: 'Erro ao cadastrar grupo'});
         }
     }
 
-    controller.writeNote = async(req, res, next) => {
-        //
+    controller.getGroup = async(req, res) => {
+        try {
+            const group = await Group.findById(req.body.group_id);
+            return res.status(200).json(group);
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao buscar grupo.'});
+        }
     }
-    controller.listNotes = async(req, res, next) => {
-        //
+
+    controller.deleteGroup = async(req, res) => {
+        try {
+            Group.deleteOne({_id: ObjectId(req.body.group_id)});
+            GroupUser.deleteMany({group_id: req.body.group_id});
+            return res.status(200).json({msg: 'Grupo removido!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao remover grupo.'});
+        }
     }
+
+    controller.updateGroup = async(req, res) => {
+        try {
+            let group = await Group.findById(req.body.group_id);
+            group = req.body;
+            group.save();
+            
+            return res.status(200).json({msg: 'Grupo atualizado!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao atualizar grupo.'});
+        }
+    }
+
+    controller.insertGroupUser = async(req, res) => {
+        try {
+            const newGroupUser = new GroupUser({
+                group_id: req.body.group_id,
+                user_id: req.body.user_id
+            });
+            newGroupUser.save();
+            
+            return res.status(200).json({msg: 'Usuário inserido ao grupo!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao inserir usuário ao grupo.'});
+        }
+    }
+
+    controller.deleteGroupUser = async(req, res) => {
+        try {
+            GroupUser.deleteOne({group_id: req.body.group_id, user_id: req.body.user_id});
+            return res.status(200).json({msg: 'Usuário removido do grupo!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao remover usuário do grupo.'});
+        }
+    }
+
+    controller.getGroupUsers = async(req, res) => {
+        try {
+            const groupUser = await GroupUser.find({group_id: req.body.group_id});
+            const users_ids = groupUser.map((element) => {
+                return element.user_id;
+            });
+            return res.status(200).json({users: users_ids});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao listar usuários.'});
+        }
+    }
+
+    controller.getUserGroups = async(req, res) => {
+        try {
+            const groupUser = await GroupUser.find({user_id: req.body.user_id});
+            const groups_ids = groupUser.map((element) => {
+                return element.group_id;
+            });
+            return res.status(200).json({groups: groups_ids});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao listar usuários.'});
+        }
+    }
+
+    controller.insertNote = async(req, res) => {
+        try {
+            const group = await Group.findById(req.body.group_id);
+            const note = {
+                title: req.body.note.title,
+                content: req.body.note.content,
+                status: req.body.note.status
+            };
+            group.notes.push(note);
+            group.save();
+
+            return res.status(200).json({msg: 'Nota cadastrada!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao inserir nota.'});
+        }
+    }
+
+    controller.deleteNote = async(req, res) => {
+        try {
+            const group = await Group.findById(req.body.group_id);
+            
+            let jsonGroup = group.toJSON();
+            jsonGroup = JSON.stringify(jsonGroup);
+            jsonGroup = JSON.parse(jsonGroup);
+            
+            group.notes = jsonGroup.notes.filter(note => note._id !== req.body.note_id);
+            group.save();
+
+            return res.status(200).json({msg: 'Nota removida!'});
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao remover nota.'});
+        }
+    }
+
+    controller.updateNote = async(req, res) => {
+        try {
+            const group = await Group.findById(req.body.group_id);
+            
+            let jsonGroup = group.toJSON();
+            jsonGroup = JSON.stringify(jsonGroup);
+            jsonGroup = JSON.parse(jsonGroup);
+            
+            let isUpdated = false;
+            jsonGroup.notes = jsonGroup.notes.map((note) => {
+                if (note._id === req.body.note._id) {
+                    isUpdated = true;
+                    return req.body.note;
+                }
+                return note;
+            });
+            group.notes = jsonGroup.notes;
+            group.save();
+
+            if (isUpdated) {
+                return res.status(200).json({msg: 'Nota atualizada!'});
+            } else {
+                return res.status(204).json({msg: 'Nota não encontrada.'});
+            }
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: 'Erro ao atualizar nota.'});
+        }
+    }
+    
     return controller
 }
