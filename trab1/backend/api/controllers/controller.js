@@ -1,5 +1,9 @@
 'use strict'
 
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 const mongoose = require('mongoose');
 
 // Conectando-se ao banco de dados
@@ -90,13 +94,27 @@ module.exports = () => {
     const controller = {}
 
     controller.logIn = async(req, res, next) => {
-        res.status(200).json({
-            token: 'mockToken'
-        })
+        const user = await User.findOne({email: req.body.email});
+        if (user === null) {
+            return res.status(400).json({msg: 'Usuário não encontrado.'});
+        }
+
+        try {
+            if (await bcrypt.compare(req.body.password, user.password)) {
+                const user = {name: req.body.email};
+                const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+                return res.status(200).json({accessToken: accessToken});
+            }
+            return res.status(400).json({msg: 'Senha incorreta.'});
+        } catch (err) {
+            console.log('Erro ao autenticar o usuário.' + err);
+            return res.status(400).json({msg: 'Erro ao autenticar o usuário.'})
+        }
     }
 
     controller.insertUser = async(req, res) => {
         try {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
             User.findOne({email: req.body.email}).then((user) => {
                 if (user) {
                     return res.status(400).json({msg: 'Email já cadastrado!'});
@@ -104,7 +122,7 @@ module.exports = () => {
                     const newUser = new User({
                         name: req.body.name,
                         email: req.body.email,
-                        password: req.body.password
+                        password: hashedPassword
                     });
     
                     newUser.save();
@@ -329,6 +347,23 @@ module.exports = () => {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao atualizar nota.'});
         }
+    }
+
+    controller.authenticateToken = async(req, res, next) => {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]
+
+        if (token === null) {
+            return res.status(401);
+        }
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+            if (err) {
+                return res.send(403);
+            }
+            req.user = user;
+            next();
+        })
     }
     
     return controller
