@@ -23,11 +23,13 @@ declare namespace JSX {
 
 }
 
-interface APINote {
-    title: string,
-    body: string,
-    id: numeber
-}
 interface APIResponse {
-    noteList: APINote[];
+    _id: string,
+    name: string,
+    notes:
+        {
+            title: string,
+            content: string
+        }[],
+    __v: number
 }

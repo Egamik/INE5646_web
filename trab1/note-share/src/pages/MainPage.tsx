@@ -1,87 +1,99 @@
-import { useEffect, useState } from "react"
-import Card from "../components/Card/Card"
-import axios from "axios"
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import AddNote from "../components/AddNote/AddNote";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import Item from "../components/Item/Item";
 
-function generateItems(input: APIResponse) : JSX.Element[] {
-    const cardList: JSX.Element[] = []
-    input.noteList.forEach(note => {
-        cardList.push((
-            <>
-                <br-item hover="true">
-                    {note.title}
-                    {note.body}
-                </br-item>
-            </>
-        ))
-    })
-    return cardList
-}
-
-// Requisita lista de notas
 async function requestNotes() {
+    const ept: APIResponse["notes"] = []
     try {
-        const response = axios.post<any, APIResponse>("http://")
-        return response
+        const response = await axios.post<any, APIResponse>("http://api-url");
+        if (Object.prototype.hasOwnProperty.call(response, "notes")) {
+            if (Array.isArray(response.notes)) {
+                return response.notes;
+            }
+            return ept
+        }
+        return ept
     } catch (err) {
-        console.log(err)
+        console.log(err);
+        return { error: true };
     }
 }
 
-/**
- * Lista items
- * ao clicar sobe popup com a nota
- * 
- * @returns 
- */
-const MainPage = () => {
-    // Click em item seta selectedNote
-    const [selectedNote, setSelectedNote] = useState<number>(0);
-    const [showPopUp, setShowPopUp] = useState<boolean>(false);
-    const [notes, setNotes] = useState<APIResponse>()
+function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
+    const result: JSX.Element[] = []
+    notes.forEach(note => {
+        result.push(
+            <Item 
+                title={note.title} 
+                content={note.content}
+                // Id do grupo
+                noteId={0} 
+            />
+        )
+    })
+    return notes.map((note, index) => (
+        <br-item 
+            hover={true} 
+            key={index}
+        >
+            {note.title}
+        </br-item>
+    ));
+}
 
-    const togglePopUp = () => {
-        setShowPopUp(!showPopUp)
-    }
+const MainPage: React.FC = () => {
+    const [notes, setNotes] = useState<APIResponse["notes"]>([]);
+    const [showAddNote, setShowAddNote] = useState<boolean>(false)
 
     useEffect(() => {
-        requestNotes().then(result => {
-            //
-            setNotes(result)
-        })
-        .catch(err => {
-            console.log(err)
-        })
-    }, [])
+        requestNotes()
+            .then((result) => {
+                if (Array.isArray(result)) {
+                    setNotes(result);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
+    const closePopUp = () => {
+        setShowAddNote(false)
+    }
 
     return (
         <div>
             <h1>Welcome to NoteShare</h1>
-            <p>
-                Add and share notes with your contacts
-            </p>
-            <br-divider/>
-            {/* linhas de notas */}
+            <p>Add and share notes with your contacts</p>
+            <br />
+            {/* Note list */}
             <div>
+                <h2>Note list</h2>
                 <br-list
-                    title="Note list"
+                    density="small"
                 >
-                    <br-item
-                        hover="true"
-                        selected="true"
-                        onClick={()=>{console.log('Request addNote')}}
+                    <br-item 
+                        hover={true} 
+                        active={true} 
+                        onClick={() => setShowAddNote(true)}
                     >
+                        <FontAwesomeIcon icon={faPlus} />
                         Add new note.
                     </br-item>
-                    { () => {
-                        if (notes !== undefined) {
-                            generateItems(notes)
-                        }
-                    } }
+                    {generateItems(notes)}
                 </br-list>
             </div>
-
+            <div>
+                {showAddNote && 
+                <AddNote 
+                    setShow={closePopUp}
+                />}
+            </div>
         </div>
-    )
-}
+    );
+};
 
-export default MainPage
+export default MainPage;

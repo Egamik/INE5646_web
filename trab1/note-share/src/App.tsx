@@ -13,7 +13,6 @@ import Menu from "./components/Menu/Menu.tsx"
 // Pages
 import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
-import AddNote from "./pages/AddNote.tsx"
 
 
 export default function App() {
@@ -43,10 +42,6 @@ export default function App() {
                                         path="/"
                                         element={<MainPage />}
                                         errorElement={<></>}
-                                    />
-                                    <Route 
-                                        path="/addnote"
-                                        element={<AddNote />}
                                     />
                                 </Routes>
                             </div>

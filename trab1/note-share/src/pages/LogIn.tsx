@@ -36,25 +36,26 @@ export default function Login(props: Props) {
         <form onSubmit={handleSubmit}>
             <div>
                 <br-input
-                    label="Usuário"
-                    placeholder="Digite seu usuário"
+                    label="Username or email"
+                    placeholder="Enter username"
                     id="user"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                 ></br-input>
                 <br-input
-                    label="Senha"
-                    placeholder="Digite sua senha"
+                    label="Password"
+                    placeholder="Enter password"
                     id="password"
                     ispassword="true"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 ></br-input>
             </div>
-            <button
+            {/* Link mainpage */}
+            <br-button
                 type="submit"
+                icon="user"
             >
-                <FontAwesomeIcon icon={faUser} />
-                Entrar
-            </button>
+                Log In
+            </br-button>
         </form>
     )
 }
