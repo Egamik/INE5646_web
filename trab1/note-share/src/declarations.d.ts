@@ -33,3 +33,19 @@ interface APIResponse {
         }[],
     __v: number
 }
+
+interface APIRequest {
+    name: string,
+    email: string,
+    password: string
+}
+
+interface APIResponseLogIn {
+    accessToken: string,
+    user_id: string
+}
+
+interface APIUserResponse {
+    message: string,
+    id: string
+}

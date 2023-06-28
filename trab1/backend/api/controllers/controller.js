@@ -104,7 +104,10 @@ module.exports = () => {
             if (await bcrypt.compare(req.body.password, user.password)) {
                 const user = {name: req.body.email};
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
-                return res.status(200).json({accessToken: accessToken});
+                return res.status(200).json({
+                    accessToken: accessToken,
+                    user_id: user._id
+                });
             }
             return res.status(400).json({msg: 'Senha incorreta.'});
         } catch (err) {
@@ -140,7 +143,10 @@ module.exports = () => {
                     });
     
                     newUser.save();
-                    return res.status(200).json({msg: 'Usuário cadastrado!'});
+                    return res.status(200).json({
+                        msg: 'Usuário cadastrado!',
+                        id: user._id
+                    });
                 }
             })
         } catch {
