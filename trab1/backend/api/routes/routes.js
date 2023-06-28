@@ -7,7 +7,7 @@ module.exports = app => {
   app.route('/logout').post(controller.authenticateToken, controller.logOut);
 
 
-  app.route('/user').post(controller.authenticateToken, controller.insertUser);
+  app.route('/user').post(controller.insertUser);
   app.route('/user').get(controller.authenticateToken, controller.getUser);
   app.route('/user').put(controller.authenticateToken, controller.updateUser);
   app.route('/user').delete(controller.authenticateToken, controller.deleteUser);
