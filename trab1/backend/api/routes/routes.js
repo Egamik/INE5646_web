@@ -4,6 +4,9 @@ module.exports = app => {
   const controller = require('../controllers/controller')(app)
   
   app.route('/').post(controller.logIn);
+  app.route('/logout').post(controller.authenticateToken, controller.logOut);
+
+
   app.route('/user').post(controller.authenticateToken, controller.insertUser);
   app.route('/user').get(controller.authenticateToken, controller.getUser);
   app.route('/user').put(controller.authenticateToken, controller.updateUser);
