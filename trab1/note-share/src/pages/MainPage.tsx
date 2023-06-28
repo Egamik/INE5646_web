@@ -30,7 +30,8 @@ function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
                 title={note.title} 
                 content={note.content}
                 // Id do grupo
-                noteId={0} 
+                noteID={0}
+                groupID={0}
             />
         )
     })
@@ -38,6 +39,7 @@ function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
         <br-item 
             hover={true} 
             key={index}
+            // onclick abre note
         >
             {note.title}
         </br-item>

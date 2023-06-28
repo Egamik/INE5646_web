@@ -1,7 +1,8 @@
 interface ItemProps {
     title: string,
     content: string,
-    noteId: number
+    noteID: number,
+    groupID: number
 }
 const Item = (props: ItemProps) => {
 

@@ -19,20 +19,20 @@ async function deleteNote(groupID: number, noteID: number) {
  * Funciona como popup
  */
 const Note = (props: NoteProps) => {
-    const [text, setText] = useState<string>()
+    const [title, setTitle] = useState<string>()
     const [content, setContent] = useState<string>()
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setContent(event.target.value);
+        setTitle(event.target.value);
     }
     const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setText(event.target.value)
+        setContent(event.target.value)
     }
 
     // Sends delete request
     const onDeleteClick = () => {
         deleteNote(props.groupID, props.noteID).then(result => {
-            //
+            // se deu bom chamar mensagem de success
         })
         .catch(err => {
             console.log(err)
@@ -40,8 +40,13 @@ const Note = (props: NoteProps) => {
     }
 
     const onSaveClick = () => {
-        //request, carrega componente de loading, retorna mensagem
+        //request, carrega componente de loading, retorna Message
         console.log("click salve")
+    }
+
+    const onShareClick = () => {
+        // n sei
+        console.log('share')
     }
 
     return (
@@ -49,7 +54,7 @@ const Note = (props: NoteProps) => {
             <h2>{props.title}</h2>
             <textarea 
                 onChange={handleContentChange}
-                placeholder={text}
+                placeholder={title}
             />
             <br-button
                 label="Save note"
@@ -65,6 +70,7 @@ const Note = (props: NoteProps) => {
                 type="secondary"
                 circle="true"
                 icon="share-nodes"
+                onClick={onShareClick}
             />
         </div>
     )

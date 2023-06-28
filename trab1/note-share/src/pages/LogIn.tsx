@@ -9,26 +9,47 @@ type Props = {
 }
 
 // Axios call
-async function sendLogIn(creds: object) {
+async function sendLogIn(username: string, email: string, password: string) {
     return axios.post(
-        'http://localhost:8080/login',
-        creds
+        'http://progweb.isac.campos.vms.ufsc.br:8080', 
+        {
+            username: username,
+            email: email,
+            password: password
+        }
     )
+}
+
+async function sendSignIn(username: string, email: string, password: string) {
+    try {
+        const response = await axios.post("http://progweb.isac.campos.vms.ufsc.br:8080/user", {
+            name: username,
+            email: email,
+            password: password
+        })
+        if (response.status == 200) {
+            return true
+        } else if (response.status === 400) {
+            return true
+        }
+        return false
+    } catch(err) {
+        console.log(err)
+        return false
+    }
 }
 
 // Login page component
 export default function Login(props: Props) {
-    const [username, setUsername] = useState<string>()
-    const [password, setPassword] = useState<string>()
+    const [username, setUsername] = useState<string>("")
+    const [email, setEmail] = useState<string>('')
+    const [password, setPassword] = useState<string>("")
 
     const handleSubmit = async (e: FormEvent) => {
         console.log('alo')
         e.preventDefault()
-        const token = await sendLogIn({
-            usr: username,
-            pw: password
-        })
-        console.log('Enviou token: ', token)
+        const token = await sendLogIn(username, email, password)
+        console.log('Recebeu token: ', token)
         props.setToken(token)
     }
 
@@ -36,11 +57,17 @@ export default function Login(props: Props) {
         <form onSubmit={handleSubmit}>
             <div>
                 <br-input
-                    label="Username or email"
+                    label="Username"
                     placeholder="Enter username"
                     id="user"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                 ></br-input>
+                <br-input 
+                    label="Email"
+                    placeholder="Enter your email"
+                    id="email"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                />
                 <br-input
                     label="Password"
                     placeholder="Enter password"
@@ -56,6 +83,10 @@ export default function Login(props: Props) {
             >
                 Log In
             </br-button>
+            <br-button
+                label="Sign In"
+                
+            />
         </form>
     )
 }

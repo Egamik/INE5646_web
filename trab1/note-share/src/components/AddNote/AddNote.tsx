@@ -60,6 +60,7 @@ const AddNote = (props: AddNoteProps) => {
     return (
         <div className="popup">
             <p>Add New Note</p>
+            {/* Fecha popup */}
             <br-button 
                 circle="true"
                 type="secondary"
