@@ -298,7 +298,7 @@ module.exports = () => {
             const groups_ids = groupUser.map((element) => {
                 return element.group_id;
             });
-            return res.status(200).json({groups: groups_ids});
+            return res.status(200).json({groups_ids: groups_ids});
         } catch (err) {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao listar usuários.'});

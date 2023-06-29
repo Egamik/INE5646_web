@@ -23,15 +23,8 @@ declare namespace JSX {
 
 }
 
-interface APIResponse {
-    _id: string,
-    name: string,
-    notes:
-        {
-            title: string,
-            content: string
-        }[],
-    __v: number
+interface APIDefaultResponse {
+    msg: string
 }
 
 interface APIRequest {
@@ -54,7 +47,14 @@ interface APILogOutRequest {
     accessToken: string
 }
 
+interface APIInsertUserRequest {
+    name: string,
+    email: string,
+    password: string
+}
+
 interface APIGetUserRequest {
+    accessToken: string,
     email: string
 }
 
@@ -66,24 +66,19 @@ interface APIGetUserResponse {
 }
 
 interface APIUpdateUserRequest {
+    accessToken: string,
     name: string,
     email: string,
     password: string
 }
 
-interface APIUpdateUserResponse {
-    msg: string
-}
-
 interface APIDeleteUserRequest {
+    accessToken: string,
     user_id: string
 }
 
-interface APIDeleteUserResponse {
-    msg: string
-}
-
 interface APIInsertGroupRequest {
+    accessToken: string,
     name: string,
     notes:
         {
@@ -94,29 +89,95 @@ interface APIInsertGroupRequest {
     group_id: string
 }
 
-interface APIInsertGroupResponse {
-    msg: string
-}
-
 interface APIGetGroupRequest {
+    accessToken: string,
     group_id: string
 }
 
 interface APIGetGroupResponse {
+    _id: string
     name: string,
     notes:
         {
+            _id: string,
             title: string,
-            content: string
+            content: string,
+            status: string
         }[],
     users_ids: string[],
-    group_id: string
 }
 
 interface APIDeleteGroupRequest {
+    accessToken: string,
     group_id: string
 }
 
-interface APIDeleteGroupResponse {
-    msg: string
+interface APIUpdateGroupRequest {
+    accessToken: string,
+    _id: string,
+    name: string,
+    notes:
+        {
+            _id: string,
+            title: string,
+            content: string,
+            status: string
+        }[],
+    users_ids: string[]
+}
+
+interface APIInsertGroupUserRequest {
+    accessToken: string,
+    group_id: string,
+    user_id: string
+}
+
+interface APIDeleteGroupUserRequest {
+    accessToken: string,
+    group_id: string,
+    user_id: string
+}
+
+interface APIDeleteGroupUsersRequest {
+    accessToken: string,
+    group_id: string
+}
+
+interface APIDeleteGroupUsersResponse {
+    msg: string,
+    users_ids: string[]
+}
+
+interface APIGetUserGroupsRequest {
+    accessToken: string,
+    user_id: string
+}
+
+interface APIGetUserGroupsResponse {
+    groups_ids: string[]
+}
+
+interface APIInsertNoteRequest {
+    accessToken: string,
+    group_id: string,
+    title: string,
+    content: string,
+    status: string
+}
+
+interface APIDeleteNoteRequest {
+    accessToken: string,
+    group_id: string,
+    note_id: string
+}
+
+interface APIUpdateNoteRequest {
+    accessToken: string,
+    group_id: string,
+    note: {
+        _id: string,
+        title: string,
+        content: string,
+        status: string
+    }
 }
