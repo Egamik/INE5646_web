@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import AddNote from "../components/AddNote/AddNote";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Item from "../components/Item/Item";
+import Note from "../components/Note/Note";
 
-async function requestNotes() {
-    const ept: APIResponse["notes"] = []
+async function requestNotes(token: string, groupID: string) {
+    let ept: APIResponse["notes"] = []
     try {
-        const response = await axios.post<any, APIResponse>("http://api-url");
+        // Concertar request type interface
+        const response = await axios.get<any, APIResponse>(
+            "http://progweb.isac.campos.vms.ufsc.br:8080/group",
+            {
+                accessToken: token,
+                group_id: groupID
+            }
+        );
         if (Object.prototype.hasOwnProperty.call(response, "notes")) {
             if (Array.isArray(response.notes)) {
                 return response.notes;
@@ -26,13 +34,15 @@ function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
     const result: JSX.Element[] = []
     notes.forEach(note => {
         result.push(
-            <Item 
-                title={note.title} 
-                content={note.content}
-                // Id do grupo
-                noteID={0}
-                groupID={0}
-            />
+            <div>
+                <Item 
+                    title={note.title} 
+                    content={note.content}
+                    // Id do grupo
+                    noteID={0}
+                    groupID={0}
+                />
+            </div>
         )
     })
     return notes.map((note, index) => (
@@ -46,12 +56,19 @@ function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
     ));
 }
 
-const MainPage: React.FC = () => {
+interface MainPageProps {
+    token: string,
+    groupID: string
+}
+
+const MainPage = (props: MainPageProps) => {
     const [notes, setNotes] = useState<APIResponse["notes"]>([]);
+    const [selectedNote, setSelectedNote] = useState<APIResponse['notes'][0] | null>(null)
+    const [showNote, setShowNote] = useState<boolean>(false)
     const [showAddNote, setShowAddNote] = useState<boolean>(false)
 
     useEffect(() => {
-        requestNotes()
+        requestNotes(props.token, props.groupID)
             .then((result) => {
                 if (Array.isArray(result)) {
                     setNotes(result);
@@ -90,9 +107,22 @@ const MainPage: React.FC = () => {
             </div>
             <div>
                 {showAddNote && 
-                <AddNote 
+                <AddNote
+                    userToken={props.token}
                     setShow={closePopUp}
                 />}
+            </div>
+            <div>
+                {showNote &&
+                <Note 
+                    token={props.token} 
+                    groupID={props.groupID} 
+                    title={props} 
+                    body={""} 
+                    noteID={""} 
+                    note={[]} 
+                />
+                }
             </div>
         </div>
     );

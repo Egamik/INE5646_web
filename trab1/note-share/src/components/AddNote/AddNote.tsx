@@ -5,12 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from '@fortawesome/free-solid-svg-icons';
 
 interface AddNoteProps {
+    userToken: string,
     setShow: () => void
 }
 
 async function requestAddNote(title: string, content: string) {
     try {
-        const response = await axios.post<APINoteRequest, any>(
+        const response = await axios.post<APIInsertNoteRequest, any>(
             "http://progweb.isac.campos.vms.ufsc.br:8080/note",
             {
                 title: title,

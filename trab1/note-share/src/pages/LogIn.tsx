@@ -1,20 +1,24 @@
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import axios from "axios"
 import Message from "../components/Message/Message"
 import "../App.css"
 
-// Inherit setState
+// Funcoes setState herdadas
+// Usado para passar parametros para contexto do App
 type Props = {
-    setToken: React.Dispatch<React.SetStateAction<string>>
-    setUID: React.Dispatch<React.SetStateAction<string>>
-    setAuth: React.Dispatch<React.SetStateAction<boolean>>
+    setToken: React.Dispatch<React.SetStateAction<string>>,
+    setUID: React.Dispatch<React.SetStateAction<string>>,
+    setAuth: React.Dispatch<React.SetStateAction<boolean>>,
+    setUserName: React.Dispatch<React.SetStateAction<string>>,
+    setEmail: React.Dispatch<React.SetStateAction<string>>,
+    setPassword: React.Dispatch<React.SetStateAction<string>>
 }
 
 // Axios call
 async function sendLogIn(email: string, password: string) {
     try {
         console.log('email: ',email)
-        const response = await axios.post<any, APIResponseLogIn>(
+        const response = await axios.post<any, APILogInResponse>(
             'http://progweb.isac.campos.vms.ufsc.br:8080/', 
             {
                 email: email,
@@ -36,9 +40,9 @@ async function sendSignIn(username: string, email: string, password: string) {
         const response = await axios.post<APIRequest, any>(
             "http://progweb.isac.campos.vms.ufsc.br:8080/user",
             {
-            name: username,
-            email: email,
-            password: password
+                name: username,
+                email: email,
+                password: password
             }
         )
         
@@ -54,6 +58,7 @@ async function sendSignIn(username: string, email: string, password: string) {
 
 // Login page component
 export default function Login(props: Props) {
+    // Estados internos do componente
     const [username, setUsername] = useState<string>("")
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>("")
@@ -61,6 +66,12 @@ export default function Login(props: Props) {
     const [messageStr, setMsgStr] = useState<string>('')
     const [messageState, setMsgState] = useState<string>('')
 
+    // Garante showMessage == false em todo render
+    useEffect(() => {
+        setShowMessage(false)
+    }, [])
+
+    // Hook para submissao de login
     const handleSubmit = () => {
         sendLogIn(email, password).then(token => {
             if (token === '') {
@@ -74,6 +85,9 @@ export default function Login(props: Props) {
             setMsgStr('Log In successful')
             console.log('Recebeu token: ', token)
             props.setToken(token)
+            props.setUserName(username)
+            props.setEmail(email)
+            props.setPassword(password)
             props.setAuth(true)
         }).catch(error => {
             setShowMessage(true)
@@ -83,6 +97,7 @@ export default function Login(props: Props) {
         })
     }
 
+    // Hook para submissao de novo usuario
     const handleSignIn = () => {
         sendSignIn(username, email, password).then(id => {
             if (id === '') {

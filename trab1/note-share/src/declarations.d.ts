@@ -29,7 +29,8 @@ interface APIResponse {
     notes:
         {
             title: string,
-            content: string
+            content: string,
+            _id: string
         }[],
     __v: number
 }
@@ -119,4 +120,15 @@ interface APIDeleteGroupRequest {
 
 interface APIDeleteGroupResponse {
     msg: string
+}
+
+interface APIInsertNoteRequest {
+    title:string,
+    content: string,
+    status: string
+}
+
+interface APIDeleteNoteRequest {
+    note_id: string,
+    group_id: string
 }

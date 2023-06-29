@@ -1,18 +1,14 @@
 import axios from "axios";
 import { useState } from "react";
+import Message from "../Message/Message";
 
-interface NoteProps {
-    title: string,
-    body: string,
-    groupID: string
-}
-
-async function deleteNote(groupID: string) {
+async function deleteNote(groupID: string, token: string) {
     try {
         const response = await axios.delete(
             "http://progweb.isac.campos.vms.ufsc.br:8080/note",
             {
-                group_id: groupID
+                accessToken: token,
+                group_id: groupID,
             }
         )
         if (response.status === 200) {
@@ -25,33 +21,21 @@ async function deleteNote(groupID: string) {
     }
 }
 
-async function addNote(title: string, content: string) {
-    try {
-        const response = await axios.post(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
-            {
-                title:title,
-                content:content,
-                status: ""
-            }
-        )
-        if (response.status === 200) {
-            return true
-        }
-        return false
-    } catch(error) {
-        console.log(error)
-        return false
-    }
-}
-
-async function editNote(groupID: string, note: string) {
+async function editNote(title: string, content: string,
+    groupID: string, noteID: string, token: string) 
+    {
     try {
         const response = await axios.put(
             "http://progweb.isac.campos.vms.ufsc.br:8080/note",
             {
-                group_id: groupID
-                note: note
+                group_id: groupID,
+                accessToken: token,
+                note: {
+                    title: title,
+                    content: content,
+                    status: "",
+                    _id: noteID
+                }
             }
         )
         if (response.status === 200) {
@@ -66,12 +50,18 @@ async function editNote(groupID: string, note: string) {
         return 2
     }
 }
+
+interface NoteProps {
+    token: string,
+    groupID: string,
+    note: APIResponse['notes'][0]
+}
 /**
  * Funciona como popup
  */
 const Note = (props: NoteProps) => {
-    const [title, setTitle] = useState<string>()
-    const [content, setContent] = useState<string>()
+    const [title, setTitle] = useState<string>('')
+    const [content, setContent] = useState<string>('')
     const [showMessage, setShowMessage] = useState<boolean>(false)
     const [messageStr, setMsgStr] = useState<string>('')
     const [messageState, setMsgState] = useState<string>('')
@@ -86,7 +76,7 @@ const Note = (props: NoteProps) => {
 
     // Sends delete request
     const onDeleteClick = () => {
-        deleteNote(props.groupID, props.noteID).then(result => {
+        deleteNote(props.groupID, props.note._id).then(result => {
             setShowMessage(true)
             if (result) {
                 setMsgState('success')
@@ -106,7 +96,30 @@ const Note = (props: NoteProps) => {
 
     const onSaveClick = () => {
         //request, carrega componente de loading, retorna Message
-        
+        editNote(title, content, props.groupID, props.noteID, props.token).then(result => {
+            switch (result) {
+                case 0:
+                    setMsgState('success')
+                    setMsgStr('Note updated')
+                    break
+                case 1:
+                    setMsgState('warning')
+                    setMsgStr('Couldn\'t update note')
+                    break
+                case 2:
+                    setMsgState('danger')
+                    setMsgStr('Something went wrong')
+                    break
+                default:
+                    break
+            }
+            setShowMessage(true)
+        }).catch(error => {
+            console.log(error)
+            setMsgState('danger')
+            setMsgStr('Something went wrong')
+            setShowMessage(true)
+        })
         console.log("click salve")
     }
 
@@ -141,7 +154,11 @@ const Note = (props: NoteProps) => {
                 />
             </div>
             <div>
-                {}
+                {showMessage &&
+                <Message 
+                    state={messageState} 
+                    text={messageStr} />
+                }
             </div>
         </div>
     )
