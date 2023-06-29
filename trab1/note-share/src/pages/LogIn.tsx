@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useState } from "react"
+import { ChangeEvent, useState } from "react"
 import axios from "axios"
 import Message from "../components/Message/Message"
 
@@ -6,6 +6,7 @@ import Message from "../components/Message/Message"
 type Props = {
     setToken: React.Dispatch<React.SetStateAction<string>>
     setUID: React.Dispatch<React.SetStateAction<string>>
+    setAuth: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 // Axios call
@@ -31,11 +32,15 @@ async function sendLogIn(username: string, email: string, password: string) {
 
 async function sendSignIn(username: string, email: string, password: string) {
     try {
-        const response = await axios.post<APIRequest, any>("http://progweb.isac.campos.vms.ufsc.br:8080/user", {
+        const response = await axios.post<APIRequest, any>(
+            "http://progweb.isac.campos.vms.ufsc.br:8080/user",
+            {
             name: username,
             email: email,
             password: password
-        })
+            }
+        )
+        
         if (response.status === 200) {
             return response.data.id
         }
@@ -68,6 +73,7 @@ export default function Login(props: Props) {
             setMsgStr('Log In successful')
             console.log('Recebeu token: ', token)
             props.setToken(token)
+            props.setAuth(true)
         }).catch(error => {
             setShowMessage(true)
             setMsgState('danger')

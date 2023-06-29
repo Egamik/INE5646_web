@@ -16,14 +16,16 @@ import MainPage from "./pages/MainPage.tsx"
 
 
 export default function App() {
-    const [token, setToken] = useState<string>()
-    const [uID, setUID] = useState<string>()
+    const [token, setToken] = useState<string>('')
+    const [uID, setUID] = useState<string>('')
+    const [auth, setAuth] = useState(false)
     
-    if (!token) {
+    if (!auth) {
         return (
             <Login 
                 setToken={setToken}
                 setUID={setUID} 
+                setAuth={setAuth}
             />
         )
     }
