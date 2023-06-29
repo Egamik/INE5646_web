@@ -95,6 +95,7 @@ module.exports = () => {
     let invalidTokens = []
 
     controller.logIn = async(req, res) => {
+        console.log('email: ' + req.body.email);
         const user = await User.findOne({email: req.body.email});
         if (user === null) {
             return res.status(400).json({msg: 'Usuário não encontrado.'});
