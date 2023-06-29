@@ -40,22 +40,83 @@ interface APIRequest {
     password: string
 }
 
-interface APIResponseLogIn {
+interface APILogInRequest {
+    email: string,
+    password: string
+}
+
+interface APILogInResponse {
     accessToken: string,
     user_id: string
 }
 
-interface APIUserResponse {
-    message: string,
-    id: string
+interface APILogOutRequest {
+    accessToken: string
 }
 
-interface APINoteRequest {
-    title: string,
-    content: string,
-    status: string
+interface APIGetUserRequest {
+    email: string
 }
 
-interface APINoteResponse {
+interface APIGetUserResponse {
+    msg: string,
+    user_id: string,
+    name: string,
+    email: string
+}
+
+interface APIUpdateUserRequest {
+    name: string,
+    email: string,
+    password: string
+}
+
+interface APIUpdateUserResponse {
+    msg: string
+}
+
+interface APIDeleteUserRequest {
+    user_id: string
+}
+
+interface APIDeleteUserResponse {
+    msg: string
+}
+
+interface APIInsertGroupRequest {
+    name: string,
+    notes:
+        {
+            title: string,
+            content: string
+        }[],
+    users_ids: string[],
+    group_id: string
+}
+
+interface APIInsertGroupResponse {
+    msg: string
+}
+
+interface APIGetGroupRequest {
+    group_id: string
+}
+
+interface APIGetGroupResponse {
+    name: string,
+    notes:
+        {
+            title: string,
+            content: string
+        }[],
+    users_ids: string[],
+    group_id: string
+}
+
+interface APIDeleteGroupRequest {
+    group_id: string
+}
+
+interface APIDeleteGroupResponse {
     msg: string
 }
