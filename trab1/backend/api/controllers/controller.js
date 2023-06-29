@@ -372,8 +372,7 @@ module.exports = () => {
     }
 
     controller.authenticateToken = async(req, res, next) => {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
+        const token = req.body.accessToken;
 
         if (invalidTokens.includes(token)) {
             jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
