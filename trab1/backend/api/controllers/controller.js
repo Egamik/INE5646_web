@@ -88,7 +88,7 @@ const AuthSchema = new mongoose.Schema({
 const User = mongoose.model('user', userSchema);
 const Group = mongoose.model('group', groupSchema);
 const GroupUser = mongoose.model('group_user', groupUserSchema);
-const Auth = mongoose.model('auth', AuthSchema);
+const Note = mongoose.model('note', noteSchema);
 
 module.exports = () => {
     const controller = {}
@@ -146,7 +146,8 @@ module.exports = () => {
                     newUser.save();
                     return res.status(200).json({
                         msg: 'Usuário cadastrado!',
-                        id: newUser._id
+                        id: newUser._id,
+                        email: newUser.email
                     });
                 }
             })
@@ -159,7 +160,7 @@ module.exports = () => {
         User.findOne({email: req.body.email}).then((user) => {
             if (user) {
                 return res.status(200).json({
-                    _id: user._id,
+                    user_id: user._id,
                     name: user.name,
                     email: user.email
                 });
@@ -307,11 +308,11 @@ module.exports = () => {
     controller.insertNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
-            const note = {
+            const note = new Note({
                 title: req.body.note.title,
                 content: req.body.note.content,
                 status: req.body.note.status
-            };
+            });
             group.notes.push(note);
             group.save();
 
