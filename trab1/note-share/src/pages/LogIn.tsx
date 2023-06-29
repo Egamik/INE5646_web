@@ -1,6 +1,7 @@
 import { ChangeEvent, useState } from "react"
 import axios from "axios"
 import Message from "../components/Message/Message"
+import "../App.css"
 
 // Inherit setState
 type Props = {
@@ -104,30 +105,34 @@ export default function Login(props: Props) {
     }
 
     return (
-        <div>
+        <div className="container">
             <div>
-                <br-input
-                    label="Username"
+                <label>Username</label>
+                <input
+                    className="input-field"
                     placeholder="Enter username"
-                    id="user"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
-                ></br-input>
-                <br-input 
-                    label="Email"
+                ></input>
+
+                <label>Email</label>
+                <input 
+                    className="input-field"
                     placeholder="Enter your email"
-                    id="email"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>{
+                        e.persist()
+                        setEmail(e.target.value)
+                    }}
                 />
-                <br-input
-                    label="Password"
+
+                <label>Password</label>
+                <input
+                    className="input-field"
                     placeholder="Enter password"
-                    id="password"
-                    ispassword="true"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                ></br-input>
+                ></input>
             </div>
             {/* Link mainpage */}
-            <div>
+            <div className="button-container">
                 <br-button
                     label="Log In"
                     icon="user"
