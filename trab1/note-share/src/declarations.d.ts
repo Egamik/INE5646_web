@@ -49,3 +49,13 @@ interface APIUserResponse {
     message: string,
     id: string
 }
+
+interface APINoteRequest {
+    title: string,
+    content: string,
+    status: string
+}
+
+interface APINoteResponse {
+    msg: string
+}

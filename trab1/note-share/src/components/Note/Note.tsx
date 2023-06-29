@@ -10,7 +10,12 @@ interface NoteProps {
 
 async function deleteNote(groupID: number, noteID: number) {
     try {
-        const response = await axios.delete("http://")
+        const response = await axios.delete(
+            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
+            {
+                
+            }
+        )
     } catch (err) {
         console.log(err)
     }

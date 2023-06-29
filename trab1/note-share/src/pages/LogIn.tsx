@@ -10,12 +10,12 @@ type Props = {
 }
 
 // Axios call
-async function sendLogIn(username: string, email: string, password: string) {
+async function sendLogIn(email: string, password: string) {
     try {
+        console.log('email: ',email)
         const response = await axios.post<any, APIResponseLogIn>(
             'http://progweb.isac.campos.vms.ufsc.br:8080/', 
             {
-                username: username,
                 email: email,
                 password: password
             }
@@ -61,12 +61,12 @@ export default function Login(props: Props) {
     const [messageState, setMsgState] = useState<string>('')
 
     const handleSubmit = () => {
-        sendLogIn(username, email, password).then(token => {
+        sendLogIn(email, password).then(token => {
             if (token === '') {
                 setShowMessage(true)
                 setMsgState('danger')
                 setMsgStr('Error on Login')
-    
+                return
             }
             setShowMessage(true)
             setMsgState('success')
@@ -88,11 +88,11 @@ export default function Login(props: Props) {
                 setShowMessage(true)
                 setMsgState('danger')
                 setMsgStr('Error on Login')
-
+                return
             }
             setShowMessage(true)
             setMsgState('success')
-            setMsgStr('Log In successful')
+            setMsgStr('Sign In successful')
             console.log('Recebeu token: ', id)
             props.setUID(id)
         }).catch(error => {

@@ -10,9 +10,19 @@ interface AddNoteProps {
 
 async function requestAddNote(title: string, content: string) {
     try {
-        const response = await axios.post("http://")
+        const response = await axios.post<APINoteRequest, any>(
+            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
+            {
+                title: title,
+                content: content,
+                status: ""
+            }
+        )
+        if (response.status == 200) {
+            return true
+        }
         // Falta checar response
-        return true
+        return false
     } catch (error) {
         console.log('error')
         return false

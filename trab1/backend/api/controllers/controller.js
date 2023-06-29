@@ -145,7 +145,7 @@ module.exports = () => {
                     newUser.save();
                     return res.status(200).json({
                         msg: 'Usuário cadastrado!',
-                        id: user._id
+                        id: newUser._id
                     });
                 }
             })
