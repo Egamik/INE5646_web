@@ -6,6 +6,16 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Item from "../components/Item/Item";
 import Note from "../components/Note/Note";
 
+// Funcao responsavel por requisicao de notas
+/**
+ * Recebe token e id de usuario
+ * Faz requisicao para pegar todos os ids de grupos aos quais o usuario
+ * faz parte
+ * Faz requisicao sobre todos os grupos encontrados para obter notas salvas em grupos
+ * @param token accessToken
+ * @param userID user id
+ * @returns Note[]
+ */
 async function requestNotes(token: string, userID: string) {
     try {
         const getUserGOptions = {
@@ -40,6 +50,7 @@ async function requestNotes(token: string, userID: string) {
                     "http://progweb.isac.campos.vms.ufsc.br:8080/group",
                     options
                 ).then(response => {
+                    console.log('Response de getGroup: ', response)
                     if (response.data.notes.length !== 0) {
                         notes.concat(response.data.notes)
                     }
@@ -146,14 +157,14 @@ const MainPage = (props: MainPageProps) => {
             </div>
             <div>
                 {/* Popup Note */}
-                {showNote && 
+                {/* {showNote && 
                 <Note 
                     token={props.token} 
                     groupID={props.groupID} 
                     note={selectedNote} 
                     toggleClose={setShowNote}
                 />
-                }
+                } */}
             </div>
         </div>
     );

@@ -16,24 +16,32 @@ import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
 import UpdateUser from "./pages/UpdateUser.tsx"
 
-
+/**
+ * 
+ * @param token 
+ * @param uid 
+ * @returns string[] contendo ids dos grupos aos quais usuario participa
+ */
 async function getUserGroups(token: string, uid: string) {
     // user-groups GET
-    const body: APIGetUserGroupsRequest = {
-        accessToken: token,
-        user_id: uid
+    const options = {
+        data: {
+            accessToken: token,
+            user_id: uid
+        }
     }
     try {
         const response = await axios.get<APIGetUserGroupsResponse>(
-            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups'
+            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups',
+            options
         )
         if (response.data.groups_ids) {
             return response.data.groups_ids
         }
-        return true
+        return []
     } catch(error) {
         console.log(error)
-        return false
+        return []
     }
 }
 
@@ -57,22 +65,19 @@ export default function App() {
                 setPassword={setPassword}
             />
         )
+    } else {
+        // Pega id dos grupos de notas do usuario
+        // Executa quando houver alteracoes de estado em token ou uID
+        useEffect(() => {
+            getUserGroups(token, uID).then(result => {
+                console.log('Deu bom getUserGroups em App')
+                if (result.length !== 0) {
+                    setGroups(result)
+                }
+            })
+        }, [token, uID])
     }
     
-    // Pega id dos grupos de notas do usuario
-    useEffect(() => {
-        getUserGroups(token, uID).then(result => {
-            if (typeof(result) === 'boolean') {
-                if (result) {
-                    // Vazio
-                }
-                // Erro
-            } else if (Array.isArray(result)) {
-                // Ids dos grupos
-                setGroups((prev) => ({...prev, result}))
-            }
-        })
-    }, [token])
     
     return (
         <Router>

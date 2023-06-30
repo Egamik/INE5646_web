@@ -127,6 +127,11 @@ module.exports = () => {
                 );
                 
                 const auth = await Auth.findOne({user_id: user._id});
+                //-------------------------------Teste
+                if (!auth) {
+                    auth = new Auth({user_id: user.id})
+                }
+                //-------------------------------------------------------------------------------
                 auth.accessToken = accessToken;
                 auth.active = true;
                 auth.save();

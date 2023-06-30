@@ -3,17 +3,10 @@ import axios, {AxiosResponse} from "axios"
 import Message from "../components/Message/Message"
 import "../App.css"
 
-// Funcoes setState herdadas
-// Usado para passar parametros para contexto do App
-type Props = {
-    setToken: React.Dispatch<React.SetStateAction<string>>,
-    setUID: React.Dispatch<React.SetStateAction<string>>,
-    setAuth: React.Dispatch<React.SetStateAction<boolean>>,
-    setUserName: React.Dispatch<React.SetStateAction<string>>,
-    setEmail: React.Dispatch<React.SetStateAction<string>>,
-    setPassword: React.Dispatch<React.SetStateAction<string>>
+interface LoginResponse {
+    token: string,
+    id: string
 }
-
 // Axios call
 async function sendLogIn(email: string, password: string) {
     try {
@@ -24,14 +17,18 @@ async function sendLogIn(email: string, password: string) {
                 password: password
             }
         )
+        console.log('Log in response: ', response)
         if (response.data.accessToken) {
-            console.log('Login token: ', response.data.accessToken)
-            return response.data.accessToken
+            const ret: LoginResponse = {
+                token: response.data.accessToken,
+                id: response.data.user_id
+            }
+            return ret
         }
-        return ''
+        return false
     } catch(err) {
         console.log(err)
-        return ''
+        return false
     }
 }
 
@@ -47,13 +44,24 @@ async function sendSignIn(username: string, email: string, password: string) {
         )
         
         if (response.status === 200) {
-            return response.data.id
+            return response.data.user_id
         }
         return ''
     } catch(err) {
         console.log(err)
         return ''
     }
+}
+
+// Funcoes setState herdadas
+// Usado para passar parametros para contexto do App
+type Props = {
+    setToken: React.Dispatch<React.SetStateAction<string>>,
+    setUID: React.Dispatch<React.SetStateAction<string>>,
+    setAuth: React.Dispatch<React.SetStateAction<boolean>>,
+    setUserName: React.Dispatch<React.SetStateAction<string>>,
+    setEmail: React.Dispatch<React.SetStateAction<string>>,
+    setPassword: React.Dispatch<React.SetStateAction<string>>
 }
 
 // Login page component
@@ -73,22 +81,28 @@ export default function Login(props: Props) {
 
     // Hook para submissao de login
     const handleSubmit = () => {
-        sendLogIn(email, password).then(token => {
-            if (token === '') {
+        sendLogIn(email, password).then(response => {
+            if (typeof(response) === "object") {
+                if (Object.prototype.hasOwnProperty.call(response, 'token')
+                && Object.prototype.hasOwnProperty.call(response, 'id')) {
+                    setShowMessage(true)
+                    setMsgState('success')
+                    setMsgStr('Log In successful')
+
+                    props.setToken(response.token)
+                    props.setUID(response.id)
+
+                    props.setUserName(username)
+                    props.setEmail(email)
+                    props.setPassword(password)
+                    props.setAuth(true)
+                }
+            } else {
                 setShowMessage(true)
                 setMsgState('danger')
                 setMsgStr('Error on Login')
                 return
             }
-            setShowMessage(true)
-            setMsgState('success')
-            setMsgStr('Log In successful')
-            console.log('Recebeu token: ', token)
-            props.setToken(token)
-            props.setUserName(username)
-            props.setEmail(email)
-            props.setPassword(password)
-            props.setAuth(true)
         }).catch(error => {
             setShowMessage(true)
             setMsgState('danger')
@@ -109,7 +123,7 @@ export default function Login(props: Props) {
             setShowMessage(true)
             setMsgState('success')
             setMsgStr('Sign In successful')
-            console.log('Recebeu token: ', id)
+            console.log('Recebeu token sign in: ', id)
             props.setUID(id)
         }).catch(error => {
             setShowMessage(true)
