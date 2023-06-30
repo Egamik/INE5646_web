@@ -19,7 +19,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/TodoList', {
 });
 
 // *** Schemas das collections do MongoDB ***
-// os schemas não possuem o _id dos documentos pois esse valor já é definido altomaticamente
+// os schemas não possuem o _id dos documentos pois esse valor já é definido automaticamente
 // pelo próprio banco de dados.
 
 // Schema da collection usuarios
