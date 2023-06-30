@@ -4,12 +4,15 @@ import Message from "../Message/Message";
 
 async function deleteNote(groupID: string, token: string) {
     try {
+        const options = {
+            data: {
+                accessToken: token,
+                group_id: groupID
+            }
+        }
         const response = await axios.delete(
             "http://progweb.isac.campos.vms.ufsc.br:8080/note",
-            {
-                accessToken: token,
-                group_id: groupID,
-            }
+            options
         )
         if (response.status === 200) {
             return true
@@ -96,7 +99,7 @@ const Note = (props: NoteProps) => {
 
     const onSaveClick = () => {
         //request, carrega componente de loading, retorna Message
-        editNote(title, content, props.groupID, props.noteID, props.token).then(result => {
+        editNote(title, content, props.groupID, props.note._id, props.token).then(result => {
             switch (result) {
                 case 0:
                     setMsgState('success')
@@ -131,7 +134,7 @@ const Note = (props: NoteProps) => {
     return (
         <div>
             <div>
-                <h2>{props.title}</h2>
+                <h2>{props.note.title}</h2>
                 <textarea 
                     onChange={handleContentChange}
                     placeholder={title}

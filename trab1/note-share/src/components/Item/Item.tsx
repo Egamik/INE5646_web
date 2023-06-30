@@ -2,10 +2,9 @@ import { useState } from "react"
 import Note from "../Note/Note"
 
 interface ItemProps {
-    title: string,
-    content: string,
-    noteID: number,
-    groupID: number
+    note: Note
+    groupID: string
+    token: string
 }
 const Item = (props: ItemProps) => {
 
@@ -16,16 +15,15 @@ const Item = (props: ItemProps) => {
         <div>
             <br-item
                 hover="true"
-                key={props.title}
+                key={props.note.title}
             >
-                {props.title}
+                {props.note.title}
             </br-item>
             {toggleNote && 
             <Note 
-                title={""} 
-                body={""} 
-                groupID={""} 
-                noteID={""} 
+                token={props.token}
+                groupID={props.groupID} 
+                note={props.note} 
             />}
         </div>
     )
