@@ -18,6 +18,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/TodoList', {
   console.error('Erro ao conectar ao banco de dados:', error);
 });
 
+// *** Schemas das collections do MongoDB ***
+// os schemas não possuem o _id dos documentos pois esse valor já é definido altomaticamente
+// pelo próprio banco de dados.
+
+// Schema da collection usuarios
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -34,6 +39,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// Schema da collection notes
 const noteSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -58,6 +64,7 @@ const groupSchema = new mongoose.Schema({
     notes: [noteSchema]
 });
 
+// Schema da collection group_users
 const groupUserSchema = new mongoose.Schema({
     user_id: {
         type: String,
@@ -69,22 +76,8 @@ const groupUserSchema = new mongoose.Schema({
     }
 });
 
-const AuthSchema = new mongoose.Schema({
-    token: {
-        type: String,
-        required: true
-    },
-    last_updated: {
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    user_id: {
-        type: Number,
-        required: true
-    }
-});
-
+// *** Modelos das collections do banco ***
+// esses modelos serão usados para comunicação com o banco
 const User = mongoose.model('user', userSchema);
 const Group = mongoose.model('group', groupSchema);
 const GroupUser = mongoose.model('group_user', groupUserSchema);
@@ -94,6 +87,14 @@ module.exports = () => {
     const controller = {}
     let invalidTokens = []
 
+
+    // *** Login no site. ***
+    // Dados necessários no body:
+        // - email
+        // - password
+    // Dados de retorno:
+        // - accessToken
+        // - user_id
     controller.logIn = async(req, res) => {
         console.log('email: ' + req.body.email);
         const user = await User.findOne({email: req.body.email});
@@ -117,6 +118,11 @@ module.exports = () => {
         }
     }
 
+    // *** Logout do site. ***
+    // Dados necessários no body:
+        // - accessToken
+    // Dados de retorno:
+        // - msg
     controller.logOut = async(req, res) => {
         try {
             const authHeader = req.headers['authorization'];
@@ -130,6 +136,15 @@ module.exports = () => {
         }
     }
 
+    // *** Criação de usuário. ***
+    // Dados necessários no body:
+        // - name
+        // - email
+        // - password
+    // Dados de retorno:
+        // - msg
+        // - user_id
+        // - email
     controller.insertUser = async(req, res) => {
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -156,6 +171,13 @@ module.exports = () => {
         }
     }
 
+    // *** Pegar dados do usuário. ***
+    // Dados necessários no body:
+        // - email
+    // Dados de retorno:
+        // - user_id
+        // - name
+        // - email
     controller.getUser = async(req, res) => {
         User.findOne({email: req.body.email}).then((user) => {
             if (user) {
@@ -170,6 +192,13 @@ module.exports = () => {
         })
     }
 
+    // *** Atualização de usuário. ***
+    // Dados necessários no body:
+        // - name
+        // - email
+        // - password
+    // Dados de retorno:
+        // - msg
     controller.updateUser = async(req, res) => {
         try {
             let updatedUser = {
@@ -187,6 +216,11 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar usuário. ***
+    // Dados necessários no body:
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.deleteUser = async(req, res) => {
         try {
             User.deleteOne({user_id: req.body.user_id});
@@ -197,6 +231,12 @@ module.exports = () => {
         }
     }
 
+    // *** Criação de grupo. ***
+    // Dados necessários no body:
+        // - name
+    // Dados de retorno:
+        // - msg
+        // - group_id
     controller.insertGroup = async(req, res) => {
         try {
             const newGroup = new Group({
@@ -213,13 +253,18 @@ module.exports = () => {
                 newGroupUser.save();
             });
             
-            return res.status(200).json({msg: 'Grupo cadastrado!'});
+            return res.status(200).json({msg: 'Grupo cadastrado!', group_id: newGroup._id});
         } catch (err) {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao cadastrar grupo'});
         }
     }
 
+    // *** Pegar grupo. ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - group
     controller.getGroup = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -230,6 +275,11 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar grupo. (deleta também de GroupUser) ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - msg
     controller.deleteGroup = async(req, res) => {
         try {
             Group.deleteOne({_id: ObjectId(req.body.group_id)});
@@ -241,6 +291,11 @@ module.exports = () => {
         }
     }
 
+    // *** Atualizar grupo. ***
+    // Dados necessários no body:
+        // - group
+    // Dados de retorno:
+        // - msg
     controller.updateGroup = async(req, res) => {
         try {
             let group = await Group.findById(req.body.group_id);
@@ -254,6 +309,12 @@ module.exports = () => {
         }
     }
 
+    // *** Adicionar usuário a um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.insertGroupUser = async(req, res) => {
         try {
             const newGroupUser = new GroupUser({
@@ -269,6 +330,12 @@ module.exports = () => {
         }
     }
 
+    // *** Remover relação entre usuário e grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.deleteGroupUser = async(req, res) => {
         try {
             GroupUser.deleteOne({group_id: req.body.group_id, user_id: req.body.user_id});
@@ -279,19 +346,29 @@ module.exports = () => {
         }
     }
 
+    // *** Pegar usuários de um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - users_ids
     controller.getGroupUsers = async(req, res) => {
         try {
             const groupUser = await GroupUser.find({group_id: req.body.group_id});
             const users_ids = groupUser.map((element) => {
                 return element.user_id;
             });
-            return res.status(200).json({users: users_ids});
+            return res.status(200).json({users_ids: users_ids});
         } catch (err) {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao listar usuários.'});
         }
     }
 
+    // *** Pegar os grupos de um usuário. ***
+    // Dados necessários no body:
+        // - user_id
+    // Dados de retorno:
+        // - groups_ids
     controller.getUserGroups = async(req, res) => {
         try {
             const groupUser = await GroupUser.find({user_id: req.body.user_id});
@@ -305,6 +382,12 @@ module.exports = () => {
         }
     }
 
+    // *** Criar e inserir uma nota em um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note
+    // Dados de retorno:
+        // - msg
     controller.insertNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -323,6 +406,12 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar nota. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note_id
+    // Dados de retorno:
+        // - msg
     controller.deleteNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -341,6 +430,12 @@ module.exports = () => {
         }
     }
 
+    // *** Atualizar os dados de uma nota. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note
+    // Dados de retorno:
+        // - msg
     controller.updateNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -371,6 +466,11 @@ module.exports = () => {
         }
     }
 
+    // *** Autenticação de token. ***
+    // Dados necessários no body:
+        // - accessToken
+    // Dados de retorno:
+        // - msg
     controller.authenticateToken = async(req, res, next) => {
         const token = req.body.accessToken;
 
