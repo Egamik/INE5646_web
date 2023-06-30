@@ -7,7 +7,7 @@ import {
   Route,
 } from "react-router-dom"
 import { useState, useEffect } from "react"
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 // Components
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"

@@ -140,6 +140,7 @@ const Note = (props: NoteProps) => {
         <div>
             <div>
                 <div>
+                    {/* Transformar titulo em editavel */}
                     <h2>{props.note.title}</h2>
                     <br-button 
                         type="secondary"

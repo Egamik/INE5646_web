@@ -18,6 +18,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/TodoList', {
   console.error('Erro ao conectar ao banco de dados:', error);
 });
 
+// *** Schemas das collections do MongoDB ***
+// os schemas não possuem o _id dos documentos pois esse valor já é definido automaticamente
+// pelo próprio banco de dados.
+
+// Schema da collection usuarios
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -34,6 +39,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// Schema da collection notes
 const noteSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -58,6 +64,7 @@ const groupSchema = new mongoose.Schema({
     notes: [noteSchema]
 });
 
+// Schema da collection group_users
 const groupUserSchema = new mongoose.Schema({
     user_id: {
         type: String,
@@ -69,33 +76,43 @@ const groupUserSchema = new mongoose.Schema({
     }
 });
 
-const AuthSchema = new mongoose.Schema({
-    token: {
+// Schema da collection auths
+const authSchema = new mongoose.Schema({
+    user_id: {
         type: String,
         required: true
     },
-    last_updated: {
-        type: Date,
-        required: true,
-        default: Date.now
+    accessToken: {
+        type: String,
+        default: ''
     },
-    user_id: {
-        type: Number,
-        required: true
+    active: {
+        type: Boolean,
+        default: false
     }
 });
 
+// *** Modelos das collections do banco ***
+// esses modelos serão usados para comunicação com o banco
 const User = mongoose.model('user', userSchema);
 const Group = mongoose.model('group', groupSchema);
 const GroupUser = mongoose.model('group_user', groupUserSchema);
 const Note = mongoose.model('note', noteSchema);
+const Auth = mongoose.model('auth', authSchema);
 
 module.exports = () => {
-    const controller = {}
-    let invalidTokens = []
+    const controller = {};
 
+
+    // *** Login no site. ***
+    // Dados necessários no body:
+        // - email
+        // - password
+    // Dados de retorno:
+        // - accessToken
+        // - user_id
     controller.logIn = async(req, res) => {
-        console.log('email: ' + req.body.email);
+        console.log('LogIn email: ' + req.body.email);
         const user = await User.findOne({email: req.body.email});
         if (user === null) {
             return res.status(400).json({msg: 'Usuário não encontrado.'});
@@ -103,8 +120,17 @@ module.exports = () => {
 
         try {
             if (await bcrypt.compare(req.body.password, user.password)) {
-                const user = {name: req.body.email};
-                const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
+                const accessToken = jwt.sign(
+                    { name: req.body.email }, 
+                    process.env.ACCESS_TOKEN_SECRET, 
+                    { expiresIn: '1h' }
+                );
+                
+                const auth = await Auth.findOne({user_id: user._id});
+                auth.accessToken = accessToken;
+                auth.active = true;
+                auth.save();
+
                 return res.status(200).json({
                     accessToken: accessToken,
                     user_id: user._id
@@ -117,11 +143,19 @@ module.exports = () => {
         }
     }
 
+    // *** Logout do site. ***
+    // Dados necessários no body:
+        // - user_id
+        // - accessToken
+    // Dados de retorno:
+        // - msg
     controller.logOut = async(req, res) => {
         try {
-            const authHeader = req.headers['authorization'];
-            const token = authHeader && authHeader.split(' ')[1];
-            invalidTokens.push(token);
+            const token = req.body.accessToken;
+
+            const auth = Auth.findOne({_id: ObjectId(req.body.user._id)});
+            auth.active = false;
+            auth.save();
             
             return res.status(400).json({msg: 'Logout realizado!'});
         } catch (err) {
@@ -130,6 +164,15 @@ module.exports = () => {
         }
     }
 
+    // *** Criação de usuário. ***
+    // Dados necessários no body:
+        // - name
+        // - email
+        // - password
+    // Dados de retorno:
+        // - msg
+        // - user_id
+        // - email
     controller.insertUser = async(req, res) => {
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -142,8 +185,13 @@ module.exports = () => {
                         email: req.body.email,
                         password: hashedPassword
                     });
-    
                     newUser.save();
+
+                    const newAuth = new Auth({
+                        user_id: newUser._id
+                    });
+                    newAuth.save();
+
                     return res.status(200).json({
                         msg: 'Usuário cadastrado!',
                         id: newUser._id,
@@ -156,6 +204,13 @@ module.exports = () => {
         }
     }
 
+    // *** Pegar dados do usuário. ***
+    // Dados necessários no body:
+        // - email
+    // Dados de retorno:
+        // - user_id
+        // - name
+        // - email
     controller.getUser = async(req, res) => {
         User.findOne({email: req.body.email}).then((user) => {
             if (user) {
@@ -170,6 +225,13 @@ module.exports = () => {
         })
     }
 
+    // *** Atualização de usuário. ***
+    // Dados necessários no body:
+        // - name
+        // - email
+        // - password
+    // Dados de retorno:
+        // - msg
     controller.updateUser = async(req, res) => {
         try {
             let updatedUser = {
@@ -187,6 +249,11 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar usuário. ***
+    // Dados necessários no body:
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.deleteUser = async(req, res) => {
         try {
             User.deleteOne({user_id: req.body.user_id});
@@ -197,6 +264,12 @@ module.exports = () => {
         }
     }
 
+    // *** Criação de grupo. ***
+    // Dados necessários no body:
+        // - name
+    // Dados de retorno:
+        // - msg
+        // - group_id
     controller.insertGroup = async(req, res) => {
         try {
             const newGroup = new Group({
@@ -213,13 +286,18 @@ module.exports = () => {
                 newGroupUser.save();
             });
             
-            return res.status(200).json({msg: 'Grupo cadastrado!'});
+            return res.status(200).json({msg: 'Grupo cadastrado!', group_id: newGroup._id});
         } catch (err) {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao cadastrar grupo'});
         }
     }
 
+    // *** Pegar grupo. ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - group
     controller.getGroup = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -230,6 +308,11 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar grupo. (deleta também de GroupUser) ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - msg
     controller.deleteGroup = async(req, res) => {
         try {
             Group.deleteOne({_id: ObjectId(req.body.group_id)});
@@ -241,6 +324,11 @@ module.exports = () => {
         }
     }
 
+    // *** Atualizar grupo. ***
+    // Dados necessários no body:
+        // - group
+    // Dados de retorno:
+        // - msg
     controller.updateGroup = async(req, res) => {
         try {
             let group = await Group.findById(req.body.group_id);
@@ -254,6 +342,12 @@ module.exports = () => {
         }
     }
 
+    // *** Adicionar usuário a um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.insertGroupUser = async(req, res) => {
         try {
             const newGroupUser = new GroupUser({
@@ -269,6 +363,12 @@ module.exports = () => {
         }
     }
 
+    // *** Remover relação entre usuário e grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - user_id
+    // Dados de retorno:
+        // - msg
     controller.deleteGroupUser = async(req, res) => {
         try {
             GroupUser.deleteOne({group_id: req.body.group_id, user_id: req.body.user_id});
@@ -279,19 +379,29 @@ module.exports = () => {
         }
     }
 
+    // *** Pegar usuários de um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+    // Dados de retorno:
+        // - users_ids
     controller.getGroupUsers = async(req, res) => {
         try {
             const groupUser = await GroupUser.find({group_id: req.body.group_id});
             const users_ids = groupUser.map((element) => {
                 return element.user_id;
             });
-            return res.status(200).json({users: users_ids});
+            return res.status(200).json({users_ids: users_ids});
         } catch (err) {
             console.log(err);
             return res.status(500).json({msg: 'Erro ao listar usuários.'});
         }
     }
 
+    // *** Pegar os grupos de um usuário. ***
+    // Dados necessários no body:
+        // - user_id
+    // Dados de retorno:
+        // - groups_ids
     controller.getUserGroups = async(req, res) => {
         try {
             const groupUser = await GroupUser.find({user_id: req.body.user_id});
@@ -305,6 +415,12 @@ module.exports = () => {
         }
     }
 
+    // *** Criar e inserir uma nota em um grupo. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note
+    // Dados de retorno:
+        // - msg
     controller.insertNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -323,6 +439,12 @@ module.exports = () => {
         }
     }
 
+    // *** Deletar nota. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note_id
+    // Dados de retorno:
+        // - msg
     controller.deleteNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -341,6 +463,12 @@ module.exports = () => {
         }
     }
 
+    // *** Atualizar os dados de uma nota. ***
+    // Dados necessários no body:
+        // - group_id
+        // - note
+    // Dados de retorno:
+        // - msg
     controller.updateNote = async(req, res) => {
         try {
             const group = await Group.findById(req.body.group_id);
@@ -371,29 +499,40 @@ module.exports = () => {
         }
     }
 
+    // *** Autenticação de token. ***
+    // Dados necessários no body:
+        // - user_id
+        // - accessToken
+    // Dados de retorno:
+        // - msg
     controller.authenticateToken = async(req, res, next) => {
-        const token = req.body.accessToken;
-
-        if (invalidTokens.includes(token)) {
-            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
-                if (err) {
-                    invalidTokens = invalidTokens.filter(element => element !== token);
-                }
-            });
-            return res.sendStatus(403);
-        }
-
-        if (token === null) {
-            return res.sendStatus(401);
-        }
-
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-            if (err) {
-                return res.sendStatus(403);
+        try {
+            const token = req.body.accessToken;
+            const auth = await Auth.findOne({user_id: req.body.user_id});
+    
+            if (!auth.active) {
+                return res.status(403).json({msg: "Usuário inativo."});
             }
-            req.user = user;
-            next();
-        });
+
+            if (token === null) {
+                return res.status(401).json({msg: "Token não recebido."});
+            }
+            
+            if (auth.accessToken !== token) {
+                return res.status(403).json({msg: "Token do usuário incorreto."});
+            }
+    
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+                if (err) {
+                    return res.status(403).json({msg: "Erro na verificação do token."});
+                }
+                req.user = user;
+                next();
+            });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: "Erro na verificação do token."});
+        }
     }
     
     return controller
