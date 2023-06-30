@@ -4,15 +4,11 @@ import Message from "../Message/Message";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from '@fortawesome/free-solid-svg-icons';
 
-interface AddNoteProps {
-    userToken: string,
-    setShow: () => void
-}
-
 async function requestAddNote(title: string, content: string) {
     try {
         const response = await axios.post<APIInsertNoteRequest, any>(
             "http://progweb.isac.campos.vms.ufsc.br:8080/note",
+            // Ta errado passar pra constante com data
             {
                 title: title,
                 content: content,
@@ -28,6 +24,12 @@ async function requestAddNote(title: string, content: string) {
         console.log('error')
         return false
     }
+}
+
+
+interface AddNoteProps {
+    userToken: string,
+    setShow: () => void
 }
 
 const AddNote = (props: AddNoteProps) => {

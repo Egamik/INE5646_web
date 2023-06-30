@@ -6,7 +6,8 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios, { AxiosResponse } from 'axios'
 // Components
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"
@@ -16,9 +17,30 @@ import MainPage from "./pages/MainPage.tsx"
 import UpdateUser from "./pages/UpdateUser.tsx"
 
 
+async function getUserGroups(token: string, uid: string) {
+    // user-groups GET
+    const body: APIGetUserGroupsRequest = {
+        accessToken: token,
+        user_id: uid
+    }
+    try {
+        const response = await axios.get<APIGetUserGroupsResponse>(
+            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups'
+        )
+        if (response.data.groups_ids) {
+            return response.data.groups_ids
+        }
+        return true
+    } catch(error) {
+        console.log(error)
+        return false
+    }
+}
+
 export default function App() {
     const [token, setToken] = useState<string>('')
     const [uID, setUID] = useState<string>('')
+    const [groups, setGroups] = useState<string[]>([])
     const [userName, setUserName] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [email, setEmail] = useState<string>('')
@@ -36,6 +58,21 @@ export default function App() {
             />
         )
     }
+    
+    // Pega id dos grupos de notas do usuario
+    useEffect(() => {
+        getUserGroups(token, uID).then(result => {
+            if (typeof(result) === 'boolean') {
+                if (result) {
+                    // Vazio
+                }
+                // Erro
+            } else if (Array.isArray(result)) {
+                // Ids dos grupos
+                setGroups((prev) => ({...prev, result}))
+            }
+        })
+    }, [token])
     
     return (
         <Router>
@@ -56,7 +93,7 @@ export default function App() {
                                         element={
                                             <MainPage 
                                                 token={token} 
-                                                uID={uID} 
+                                                userID={uID}
                                             />
                                         }
                                         errorElement={<></>}

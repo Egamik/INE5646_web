@@ -6,27 +6,50 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Item from "../components/Item/Item";
 import Note from "../components/Note/Note";
 
-async function requestNotes(token: string, groupID: string) {
-    const ept: APIResponse["notes"] = []
+async function requestNotes(token: string, userID: string) {
     try {
-        // Concertar request type interface
-        const options = {
+        const getUserGOptions = {
             data: {
                 accessToken: token,
-                group_id: groupID
+                user_id: userID
             }
         }
-        const response = await axios.get<APIGetGroupResponse>(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/group",
-            options
-        );
-        if (Object.prototype.hasOwnProperty.call(response, "notes")) {
-            if (Array.isArray(response.data.notes)) {
-                return response.data.notes;
-            }
-            return ept
+        
+        // Pega ids dos grupos de notas de um usuario
+        const groupIDS = await axios.get<APIGetUserGroupsResponse>(
+            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups',
+            getUserGOptions
+        )
+        console.log(groupIDS)
+
+        // Se nao existem notas associadas retornar
+        if (groupIDS.data.groups_ids.length === 0) {
+            return []
+        } 
+        else {
+            // Para cada id de grupo de notas pegar notas
+            const notes: Note[] = []
+            groupIDS.data.groups_ids.forEach(id => {
+                const options = {
+                    data: {
+                        accessToken: token,
+                        group_id: id
+                    }
+                }
+                axios.get<APIGetGroupResponse>(
+                    "http://progweb.isac.campos.vms.ufsc.br:8080/group",
+                    options
+                ).then(response => {
+                    if (response.data.notes.length !== 0) {
+                        notes.concat(response.data.notes)
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    return { error: true }
+                })
+            })
+            return notes
         }
-        return ept
     } catch (err) {
         console.log(err);
         return { error: true };
@@ -35,7 +58,7 @@ async function requestNotes(token: string, groupID: string) {
 
 interface MainPageProps {
     token: string,
-    groupID: string
+    userID: string
 }
 
 const MainPage = (props: MainPageProps) => {
@@ -47,36 +70,41 @@ const MainPage = (props: MainPageProps) => {
     }
 
     const [notes, setNotes] = useState<APIResponse["notes"]>([]);
+    // [_id_nota, _id_grupo]
+    const [notesDic, setNotesDic] = useState<Record<string, string>>()
     const [selectedNote, setSelectedNote] = useState<APIResponse['notes'][0]>(initSelected)
     const [showNote, setShowNote] = useState<boolean>(false)
     const [showAddNote, setShowAddNote] = useState<boolean>(false)
 
     // Pega notas do servidor antes de renderizar
     useEffect(() => {
-        requestNotes(props.token, props.groupID)
-            .then((result) => {
-                if (Array.isArray(result)) {
-                    setNotes(result);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        // Pegar groupID do user antes
+        requestNotes(props.token, props.userID)
+        .then((result) => {
+            if (Array.isArray(result)) {
+                setNotes(result);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
     }, []);
 
     const closePopUp = () => {
         setShowAddNote(false)
     }
     // Gera componentes filhos
-    const generateItems = (notes: APIResponse["notes"]): JSX.Element[] => {
+    const generateItems = (notes: APIResponse["notes"], token: string): JSX.Element[] => {
         const result: JSX.Element[] = []
         notes.forEach(note => {
             result.push(
                 <div>
                     <Item 
                         note={note} 
-                        groupID={""} 
-                        token={""}                        
+                        groupID={token} 
+                        token={""}
+                        setSelectedNote={setSelectedNote} 
+                        showNote={setShowNote}            
                     />
                 </div>
             )
@@ -105,7 +133,7 @@ const MainPage = (props: MainPageProps) => {
                         Add new note.
                     </br-item>
                     {/* Listagem de notas */}
-                    {generateItems(notes)}
+                    {generateItems(notes, props.token)}
                 </br-list>
             </div>
             <div>
@@ -123,6 +151,7 @@ const MainPage = (props: MainPageProps) => {
                     token={props.token} 
                     groupID={props.groupID} 
                     note={selectedNote} 
+                    toggleClose={setShowNote}
                 />
                 }
             </div>

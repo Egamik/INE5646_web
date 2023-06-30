@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import Message from "../Message/Message";
 
+// Requisicao para deletar nota
 async function deleteNote(groupID: string, token: string) {
     try {
         const options = {
@@ -24,6 +25,7 @@ async function deleteNote(groupID: string, token: string) {
     }
 }
 
+// Requisicao para editar notas
 async function editNote(title: string, content: string,
     groupID: string, noteID: string, token: string) 
     {
@@ -58,9 +60,11 @@ interface NoteProps {
     token: string,
     groupID: string,
     note: APIResponse['notes'][0]
+    toggleClose: React.Dispatch<React.SetStateAction<boolean>>
 }
 /**
- * Funciona como popup
+ * Componente para uma nota
+ * Funcionamento como popup
  */
 const Note = (props: NoteProps) => {
     const [title, setTitle] = useState<string>('')
@@ -77,7 +81,7 @@ const Note = (props: NoteProps) => {
         setContent(event.target.value)
     }
 
-    // Sends delete request
+    // Handler de delete
     const onDeleteClick = () => {
         deleteNote(props.groupID, props.note._id).then(result => {
             setShowMessage(true)
@@ -97,6 +101,7 @@ const Note = (props: NoteProps) => {
         })
     }
 
+    // Handler de save
     const onSaveClick = () => {
         //request, carrega componente de loading, retorna Message
         editNote(title, content, props.groupID, props.note._id, props.token).then(result => {
@@ -134,27 +139,36 @@ const Note = (props: NoteProps) => {
     return (
         <div>
             <div>
-                <h2>{props.note.title}</h2>
+                <div>
+                    <h2>{props.note.title}</h2>
+                    <br-button 
+                        type="secondary"
+                        circle="true"
+                        onClick={props.toggleClose(true)}
+                    />
+                </div>
                 <textarea 
                     onChange={handleContentChange}
                     placeholder={title}
                 />
-                <br-button
-                    label="Save note"
-                    type="primary"
-                    onClick={onSaveClick}
-                />
-                <br-button
-                    label="Delete note"
-                    type="secondary"
-                    onClick={onDeleteClick}
-                />
-                <br-button 
-                    type="secondary"
-                    circle="true"
-                    icon="share-nodes"
-                    onClick={onShareClick}
-                />
+                <div>
+                    <br-button
+                        label="Save note"
+                        type="primary"
+                        onClick={onSaveClick}
+                    />
+                    <br-button
+                        label="Delete note"
+                        type="secondary"
+                        onClick={onDeleteClick}
+                    />
+                    <br-button 
+                        type="secondary"
+                        circle="true"
+                        icon="share-nodes"
+                        onClick={onShareClick}
+                    />
+                </div>
             </div>
             <div>
                 {showMessage &&

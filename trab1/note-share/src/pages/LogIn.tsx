@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react"
-import axios from "axios"
+import axios, {AxiosResponse} from "axios"
 import Message from "../components/Message/Message"
 import "../App.css"
 
@@ -17,16 +17,16 @@ type Props = {
 // Axios call
 async function sendLogIn(email: string, password: string) {
     try {
-        console.log('email: ',email)
-        const response = await axios.post<any, APILogInResponse>(
+        const response = await axios.post<any, AxiosResponse<APILogInResponse>>(
             'http://progweb.isac.campos.vms.ufsc.br:8080/', 
             {
                 email: email,
                 password: password
             }
         )
-        if (response.accessToken) {
-            return response.accessToken
+        if (response.data.accessToken) {
+            console.log('Login token: ', response.data.accessToken)
+            return response.data.accessToken
         }
         return ''
     } catch(err) {

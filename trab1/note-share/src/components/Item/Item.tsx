@@ -5,26 +5,24 @@ interface ItemProps {
     note: Note
     groupID: string
     token: string
+    setSelectedNote: React.Dispatch<React.SetStateAction<APIResponse['notes'][0]>>
+    showNote: React.Dispatch<React.SetStateAction<boolean>>
 }
+
 const Item = (props: ItemProps) => {
-
-    const [toggleNote, setToggleNote] = useState(false)
-
 
     return (
         <div>
             <br-item
                 hover="true"
                 key={props.note.title}
+                onClick={() => {
+                    props.setSelectedNote(props.note)
+                    props.showNote(true)
+                }}
             >
                 {props.note.title}
             </br-item>
-            {toggleNote && 
-            <Note 
-                token={props.token}
-                groupID={props.groupID} 
-                note={props.note} 
-            />}
         </div>
     )
 }
