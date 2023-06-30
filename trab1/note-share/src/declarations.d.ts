@@ -23,6 +23,20 @@ declare namespace JSX {
 
 }
 
+interface Note {
+    _id: string
+    title: string,
+    content: string,
+    status: string
+}
+
+interface APIResponse {
+    _id: string,
+    name: string,
+    notes: Note[],
+    __v: number
+}
+
 interface APIDefaultResponse {
     msg: string
 }
@@ -80,11 +94,7 @@ interface APIDeleteUserRequest {
 interface APIInsertGroupRequest {
     accessToken: string,
     name: string,
-    notes:
-        {
-            title: string,
-            content: string
-        }[],
+    notes: Note[],
     users_ids: string[],
     group_id: string
 }
@@ -97,13 +107,7 @@ interface APIGetGroupRequest {
 interface APIGetGroupResponse {
     _id: string
     name: string,
-    notes:
-        {
-            _id: string,
-            title: string,
-            content: string,
-            status: string
-        }[],
+    notes: Note[],
     users_ids: string[],
 }
 
@@ -116,13 +120,7 @@ interface APIUpdateGroupRequest {
     accessToken: string,
     _id: string,
     name: string,
-    notes:
-        {
-            _id: string,
-            title: string,
-            content: string,
-            status: string
-        }[],
+    notes: Note[],
     users_ids: string[]
 }
 
@@ -180,4 +178,15 @@ interface APIUpdateNoteRequest {
         content: string,
         status: string
     }
+}
+
+interface APIInsertNoteRequest {
+    title:string,
+    content: string,
+    status: string
+}
+
+interface APIDeleteNoteRequest {
+    note_id: string,
+    group_id: string
 }

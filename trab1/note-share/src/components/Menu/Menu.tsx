@@ -12,6 +12,12 @@ const Menu = () => {
             name: "Add Note",
             url: "/addnote",
         },
+        {
+            id: 3,
+            icon: "users-cog",
+            name: "Edit Account",
+            url: "/edit-user",
+        },
     ];
 
     return (

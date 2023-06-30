@@ -13,12 +13,16 @@ import Menu from "./components/Menu/Menu.tsx"
 // Pages
 import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
+import UpdateUser from "./pages/UpdateUser.tsx"
 
 
 export default function App() {
     const [token, setToken] = useState<string>('')
     const [uID, setUID] = useState<string>('')
-    const [auth, setAuth] = useState(false)
+    const [userName, setUserName] = useState<string>('')
+    const [password, setPassword] = useState<string>('')
+    const [email, setEmail] = useState<string>('')
+    const [auth, setAuth] = useState<boolean>(false)
     
     if (!auth) {
         return (
@@ -26,6 +30,9 @@ export default function App() {
                 setToken={setToken}
                 setUID={setUID} 
                 setAuth={setAuth}
+                setUserName={setUserName}
+                setEmail={setEmail}
+                setPassword={setPassword}
             />
         )
     }
@@ -46,8 +53,24 @@ export default function App() {
                                 <Routes>
                                     <Route
                                         path="/"
-                                        element={<MainPage />}
+                                        element={
+                                            <MainPage 
+                                                token={token} 
+                                                uID={uID} 
+                                            />
+                                        }
                                         errorElement={<></>}
+                                    />
+                                    <Route 
+                                        path="/edit-user"
+                                        element={
+                                            <UpdateUser 
+                                                token={token} 
+                                                username={userName} 
+                                                email={email} 
+                                                password={password}    
+                                            />
+                                        }
                                     />
                                 </Routes>
                             </div>

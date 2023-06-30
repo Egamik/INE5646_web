@@ -1,17 +1,28 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import AddNote from "../components/AddNote/AddNote";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Item from "../components/Item/Item";
+import Note from "../components/Note/Note";
 
-async function requestNotes() {
+async function requestNotes(token: string, groupID: string) {
     const ept: APIResponse["notes"] = []
     try {
-        const response = await axios.post<any, APIResponse>("http://api-url");
+        // Concertar request type interface
+        const options = {
+            data: {
+                accessToken: token,
+                group_id: groupID
+            }
+        }
+        const response = await axios.get<APIGetGroupResponse>(
+            "http://progweb.isac.campos.vms.ufsc.br:8080/group",
+            options
+        );
         if (Object.prototype.hasOwnProperty.call(response, "notes")) {
-            if (Array.isArray(response.notes)) {
-                return response.notes;
+            if (Array.isArray(response.data.notes)) {
+                return response.data.notes;
             }
             return ept
         }
@@ -22,36 +33,27 @@ async function requestNotes() {
     }
 }
 
-function generateItems(notes: APIResponse["notes"]): JSX.Element[] {
-    const result: JSX.Element[] = []
-    notes.forEach(note => {
-        result.push(
-            <Item 
-                title={note.title} 
-                content={note.content}
-                // Id do grupo
-                noteID={0}
-                groupID={0}
-            />
-        )
-    })
-    return notes.map((note, index) => (
-        <br-item 
-            hover={true} 
-            key={index}
-            // onclick abre note
-        >
-            {note.title}
-        </br-item>
-    ));
+interface MainPageProps {
+    token: string,
+    groupID: string
 }
 
-const MainPage: React.FC = () => {
+const MainPage = (props: MainPageProps) => {
+    const initSelected: Note = {
+        _id: "",
+        title: "",
+        content: "",
+        status: ""
+    }
+
     const [notes, setNotes] = useState<APIResponse["notes"]>([]);
+    const [selectedNote, setSelectedNote] = useState<APIResponse['notes'][0]>(initSelected)
+    const [showNote, setShowNote] = useState<boolean>(false)
     const [showAddNote, setShowAddNote] = useState<boolean>(false)
 
+    // Pega notas do servidor antes de renderizar
     useEffect(() => {
-        requestNotes()
+        requestNotes(props.token, props.groupID)
             .then((result) => {
                 if (Array.isArray(result)) {
                     setNotes(result);
@@ -65,6 +67,22 @@ const MainPage: React.FC = () => {
     const closePopUp = () => {
         setShowAddNote(false)
     }
+    // Gera componentes filhos
+    const generateItems = (notes: APIResponse["notes"]): JSX.Element[] => {
+        const result: JSX.Element[] = []
+        notes.forEach(note => {
+            result.push(
+                <div>
+                    <Item 
+                        note={note} 
+                        groupID={""} 
+                        token={""}                        
+                    />
+                </div>
+            )
+        })
+        return result;
+    }
 
     return (
         <div>
@@ -77,6 +95,7 @@ const MainPage: React.FC = () => {
                 <br-list
                     density="small"
                 >
+                    {/* Item de adicao de notas */}
                     <br-item 
                         hover={true} 
                         active={true} 
@@ -85,14 +104,27 @@ const MainPage: React.FC = () => {
                         <FontAwesomeIcon icon={faPlus} />
                         Add new note.
                     </br-item>
+                    {/* Listagem de notas */}
                     {generateItems(notes)}
                 </br-list>
             </div>
             <div>
+                {/* Popup AddNote */}
                 {showAddNote && 
-                <AddNote 
+                <AddNote
+                    userToken={props.token}
                     setShow={closePopUp}
                 />}
+            </div>
+            <div>
+                {/* Popup Note */}
+                {showNote && 
+                <Note 
+                    token={props.token} 
+                    groupID={props.groupID} 
+                    note={selectedNote} 
+                />
+                }
             </div>
         </div>
     );
