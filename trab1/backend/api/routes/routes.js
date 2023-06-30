@@ -24,7 +24,7 @@ module.exports = app => {
   app.route('/group-user').post(controller.authenticateToken, controller.insertGroupUser);
   app.route('/group-user').delete(controller.authenticateToken, controller.deleteGroup);
   app.route('/group-users').get(controller.authenticateToken, controller.getGroupUsers);
-  app.route('/user-groups').get(controller.authenticateToken, controller.getUserGroups);
+  app.route('/user-groups').post(controller.authenticateToken, controller.getUserGroups);
 
   // *** Rotas para as operações de nota ***
   app.route('/note').post(controller.authenticateToken, controller.insertNote);

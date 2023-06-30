@@ -77,8 +77,10 @@ async function getUserGroups(token: string, uid: string) {
     // user-groups GET
     const options = {
         params: {
-            accessToken: token,
             user_id: uid
+        },
+        data: {
+            accessToken: token
         }
     }
     try {

@@ -409,7 +409,7 @@ module.exports = () => {
         // - groups_ids
     controller.getUserGroups = async(req, res) => {
         try {
-            const groupUser = await GroupUser.find({ user_id: req.params.user_id }); // Access the variable from params instead of body
+            const groupUser = await GroupUser.find({ user_id: req.body.user_id }); // Access the variable from params instead of body
             const groups_ids = groupUser.map((element) => {
                 return element.group_id;
             });
