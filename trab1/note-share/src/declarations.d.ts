@@ -67,6 +67,12 @@ interface APIInsertUserRequest {
     password: string
 }
 
+interface APIInsertUserResponse {
+    msg: string
+    user_id: string
+    email: string
+}
+
 interface APIGetUserRequest {
     accessToken: string,
     email: string

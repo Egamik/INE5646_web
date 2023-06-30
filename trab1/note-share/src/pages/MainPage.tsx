@@ -67,6 +67,36 @@ async function requestNotes(token: string, userID: string) {
     }
 }
 
+/**
+ * 
+ * @param token 
+ * @param uid 
+ * @returns string[] contendo ids dos grupos aos quais usuario participa
+ */
+async function getUserGroups(token: string, uid: string) {
+    // user-groups GET
+    const options = {
+        params: {
+            accessToken: token,
+            user_id: uid
+        }
+    }
+    try {
+        const response = await axios.get<APIGetUserGroupsResponse>(
+            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups',
+            options
+        )
+
+        if (response.data.groups_ids) {
+            return response.data.groups_ids
+        }
+        return []
+    } catch (error) {
+        console.log('Error em getUserGroups MainPage', error)
+        return []
+    }
+}
+
 interface MainPageProps {
     token: string,
     userID: string
@@ -82,23 +112,34 @@ const MainPage = (props: MainPageProps) => {
 
     const [notes, setNotes] = useState<APIResponse["notes"]>([]);
     // [_id_nota, _id_grupo]
-    const [notesDic, setNotesDic] = useState<Record<string, string>>()
+    const [groups, setGroups] = useState<string[]>([])
     const [selectedNote, setSelectedNote] = useState<APIResponse['notes'][0]>(initSelected)
     const [showNote, setShowNote] = useState<boolean>(false)
     const [showAddNote, setShowAddNote] = useState<boolean>(false)
 
     // Pega notas do servidor antes de renderizar
     useEffect(() => {
+        console.log('Use effect de MainPage: ', props)
         // Pegar groupID do user antes
-        requestNotes(props.token, props.userID)
-        .then((result) => {
-            if (Array.isArray(result)) {
-                setNotes(result);
+        getUserGroups(props.token, props.userID).then((result) => {
+            if (result.length !== 0) {
+                setGroups(result)
             }
+        }).catch((error) => {
+
+            console.log('Error while getting user groups', error)
         })
-        .catch((err) => {
-            console.log(err);
-        });
+        if (groups.length !== 0) {
+            requestNotes(props.token, props.userID)
+            .then((result) => {
+                if (Array.isArray(result)) {
+                    setNotes(result);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+        }
     }, []);
 
     const closePopUp = () => {

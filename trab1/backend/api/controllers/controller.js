@@ -409,14 +409,14 @@ module.exports = () => {
         // - groups_ids
     controller.getUserGroups = async(req, res) => {
         try {
-            const groupUser = await GroupUser.find({user_id: req.body.user_id});
+            const groupUser = await GroupUser.find({ user_id: req.params.user_id }); // Access the variable from params instead of body
             const groups_ids = groupUser.map((element) => {
                 return element.group_id;
             });
-            return res.status(200).json({groups_ids: groups_ids});
+            return res.status(200).json({ groups_ids: groups_ids });
         } catch (err) {
             console.log(err);
-            return res.status(500).json({msg: 'Erro ao listar usuários.'});
+            return res.status(500).json({ msg: 'Erro ao listar usuários.' });
         }
     }
 

@@ -17,7 +17,7 @@ async function sendLogIn(email: string, password: string) {
                 password: password
             }
         )
-        console.log('Log in response: ', response)
+        console.log('sendLogIn response: ', response)
         if (response.data.accessToken) {
             const ret: LoginResponse = {
                 token: response.data.accessToken,
@@ -34,7 +34,7 @@ async function sendLogIn(email: string, password: string) {
 
 async function sendSignIn(username: string, email: string, password: string) {
     try {
-        const response = await axios.post<APIRequest, any>(
+        const response = await axios.post<APIRequest, AxiosResponse<APIInsertUserResponse>>(
             "http://progweb.isac.campos.vms.ufsc.br:8080/user",
             {
                 name: username,
@@ -82,13 +82,16 @@ export default function Login(props: Props) {
     // Hook para submissao de login
     const handleSubmit = () => {
         sendLogIn(email, password).then(response => {
+
+            console.log('handleSubmit response: ', response)
+
             if (typeof(response) === "object") {
                 if (Object.prototype.hasOwnProperty.call(response, 'token')
                 && Object.prototype.hasOwnProperty.call(response, 'id')) {
                     setShowMessage(true)
                     setMsgState('success')
                     setMsgStr('Log In successful')
-
+                    console.log('Token setado em login: ', response.token)
                     props.setToken(response.token)
                     props.setUID(response.id)
 
@@ -124,6 +127,9 @@ export default function Login(props: Props) {
             setMsgState('success')
             setMsgStr('Sign In successful')
             console.log('Recebeu token sign in: ', id)
+            props.setEmail(email)
+            props.setUserName(username)
+            props.setPassword(password)
             props.setUID(id)
         }).catch(error => {
             setShowMessage(true)

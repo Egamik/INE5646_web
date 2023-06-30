@@ -6,8 +6,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
-import { useState, useEffect } from "react"
-import axios from 'axios'
+import { useState } from "react"
 // Components
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"
@@ -16,39 +15,10 @@ import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
 import UpdateUser from "./pages/UpdateUser.tsx"
 
-/**
- * 
- * @param token 
- * @param uid 
- * @returns string[] contendo ids dos grupos aos quais usuario participa
- */
-async function getUserGroups(token: string, uid: string) {
-    // user-groups GET
-    const options = {
-        data: {
-            accessToken: token,
-            user_id: uid
-        }
-    }
-    try {
-        const response = await axios.get<APIGetUserGroupsResponse>(
-            'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups',
-            options
-        )
-        if (response.data.groups_ids) {
-            return response.data.groups_ids
-        }
-        return []
-    } catch(error) {
-        console.log(error)
-        return []
-    }
-}
 
 export default function App() {
     const [token, setToken] = useState<string>('')
     const [uID, setUID] = useState<string>('')
-    const [groups, setGroups] = useState<string[]>([])
     const [userName, setUserName] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [email, setEmail] = useState<string>('')
@@ -65,18 +35,7 @@ export default function App() {
                 setPassword={setPassword}
             />
         )
-    } else {
-        // Pega id dos grupos de notas do usuario
-        // Executa quando houver alteracoes de estado em token ou uID
-        useEffect(() => {
-            getUserGroups(token, uID).then(result => {
-                console.log('Deu bom getUserGroups em App')
-                if (result.length !== 0) {
-                    setGroups(result)
-                }
-            })
-        }, [token, uID])
-    }
+    } 
     
     
     return (
