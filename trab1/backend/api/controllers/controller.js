@@ -76,16 +76,32 @@ const groupUserSchema = new mongoose.Schema({
     }
 });
 
+// Schema da collection auths
+const authSchema = new mongoose.Schema({
+    user_id: {
+        type: String,
+        required: true
+    },
+    accessToken: {
+        type: String,
+        default: ''
+    },
+    active: {
+        type: Boolean,
+        default: false
+    }
+});
+
 // *** Modelos das collections do banco ***
 // esses modelos serão usados para comunicação com o banco
 const User = mongoose.model('user', userSchema);
 const Group = mongoose.model('group', groupSchema);
 const GroupUser = mongoose.model('group_user', groupUserSchema);
 const Note = mongoose.model('note', noteSchema);
+const Auth = mongoose.model('auth', authSchema);
 
 module.exports = () => {
-    const controller = {}
-    let invalidTokens = []
+    const controller = {};
 
 
     // *** Login no site. ***
@@ -96,7 +112,7 @@ module.exports = () => {
         // - accessToken
         // - user_id
     controller.logIn = async(req, res) => {
-        console.log('email: ' + req.body.email);
+        console.log('LogIn email: ' + req.body.email);
         const user = await User.findOne({email: req.body.email});
         if (user === null) {
             return res.status(400).json({msg: 'Usuário não encontrado.'});
@@ -104,8 +120,17 @@ module.exports = () => {
 
         try {
             if (await bcrypt.compare(req.body.password, user.password)) {
-                const user = {name: req.body.email};
-                const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'});
+                const accessToken = jwt.sign(
+                    { name: req.body.email }, 
+                    process.env.ACCESS_TOKEN_SECRET, 
+                    { expiresIn: '1h' }
+                );
+                
+                const auth = await Auth.findOne({user_id: user._id});
+                auth.accessToken = accessToken;
+                auth.active = true;
+                auth.save();
+
                 return res.status(200).json({
                     accessToken: accessToken,
                     user_id: user._id
@@ -120,14 +145,17 @@ module.exports = () => {
 
     // *** Logout do site. ***
     // Dados necessários no body:
+        // - user_id
         // - accessToken
     // Dados de retorno:
         // - msg
     controller.logOut = async(req, res) => {
         try {
-            const authHeader = req.headers['authorization'];
-            const token = authHeader && authHeader.split(' ')[1];
-            invalidTokens.push(token);
+            const token = req.body.accessToken;
+
+            const auth = Auth.findOne({_id: ObjectId(req.body.user._id)});
+            auth.active = false;
+            auth.save();
             
             return res.status(400).json({msg: 'Logout realizado!'});
         } catch (err) {
@@ -157,8 +185,13 @@ module.exports = () => {
                         email: req.body.email,
                         password: hashedPassword
                     });
-    
                     newUser.save();
+
+                    const newAuth = new Auth({
+                        user_id: newUser._id
+                    });
+                    newAuth.save();
+
                     return res.status(200).json({
                         msg: 'Usuário cadastrado!',
                         id: newUser._id,
@@ -468,32 +501,38 @@ module.exports = () => {
 
     // *** Autenticação de token. ***
     // Dados necessários no body:
+        // - user_id
         // - accessToken
     // Dados de retorno:
         // - msg
     controller.authenticateToken = async(req, res, next) => {
-        const token = req.body.accessToken;
-
-        if (invalidTokens.includes(token)) {
-            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err) => {
-                if (err) {
-                    invalidTokens = invalidTokens.filter(element => element !== token);
-                }
-            });
-            return res.sendStatus(403);
-        }
-
-        if (token === null) {
-            return res.sendStatus(401);
-        }
-
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-            if (err) {
-                return res.sendStatus(403);
+        try {
+            const token = req.body.accessToken;
+            const auth = await Auth.findOne({user_id: req.body.user_id});
+    
+            if (!auth.active) {
+                return res.status(403).json({msg: "Usuário inativo."});
             }
-            req.user = user;
-            next();
-        });
+
+            if (token === null) {
+                return res.status(401).json({msg: "Token não recebido."});
+            }
+            
+            if (auth.accessToken !== token) {
+                return res.status(403).json({msg: "Token do usuário incorreto."});
+            }
+    
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+                if (err) {
+                    return res.status(403).json({msg: "Erro na verificação do token."});
+                }
+                req.user = user;
+                next();
+            });
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({msg: "Erro na verificação do token."});
+        }
     }
     
     return controller
