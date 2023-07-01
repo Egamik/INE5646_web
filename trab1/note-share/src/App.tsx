@@ -6,7 +6,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 // Components
 import Header from "./components/Header/Header.tsx"
 import Menu from "./components/Menu/Menu.tsx"
@@ -15,6 +15,9 @@ import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
 import UpdateUser from "./pages/UpdateUser.tsx"
 
+interface AuthState {
+    auth: boolean;
+}
 
 export default function App() {
     const [token, setToken] = useState<string>('')
@@ -22,9 +25,18 @@ export default function App() {
     const [userName, setUserName] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [email, setEmail] = useState<string>('')
-    const [auth, setAuth] = useState<boolean>(false)
+    const [auth, setAuth] = useState<AuthState>(() => {
+        // Retrieve authentication state from localStorage
+        const storedAuth = localStorage.getItem("auth");
+        return storedAuth ? JSON.parse(storedAuth) : { auth: false };
+    });
+
+    useEffect(() => {
+        // Update localStorage when auth state changes
+        localStorage.setItem("auth", JSON.stringify(auth));
+    }, [auth]);
     
-    if (!auth) {
+    if (!auth.auth) {
         return (
             <Login 
                 setToken={setToken}

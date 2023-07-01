@@ -76,17 +76,18 @@ async function requestNotes(token: string, userID: string) {
 async function getUserGroups(token: string, uid: string) {
     // user-groups GET
     const options = {
-        params: {
-            user_id: uid
-        },
         data: {
-            accessToken: token
+            accessToken: token,
+            user_id: uid
         }
     }
     try {
-        const response = await axios.get<APIGetUserGroupsResponse>(
+        const response = await axios.post<APIGetUserGroupsResponse>(
             'http://progweb.isac.campos.vms.ufsc.br:8080/user-groups',
-            options
+            {
+                accessToken: token,
+                user_id: uid
+            }
         )
 
         if (response.data.groups_ids) {

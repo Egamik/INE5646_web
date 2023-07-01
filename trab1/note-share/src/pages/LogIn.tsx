@@ -53,12 +53,17 @@ async function sendSignIn(username: string, email: string, password: string) {
     }
 }
 
+
+interface AuthState {
+    auth: boolean;
+}
+
 // Funcoes setState herdadas
 // Usado para passar parametros para contexto do App
 type Props = {
     setToken: React.Dispatch<React.SetStateAction<string>>,
     setUID: React.Dispatch<React.SetStateAction<string>>,
-    setAuth: React.Dispatch<React.SetStateAction<boolean>>,
+    setAuth: React.Dispatch<React.SetStateAction<AuthState>>
     setUserName: React.Dispatch<React.SetStateAction<string>>,
     setEmail: React.Dispatch<React.SetStateAction<string>>,
     setPassword: React.Dispatch<React.SetStateAction<string>>
@@ -98,7 +103,7 @@ export default function Login(props: Props) {
                     props.setUserName(username)
                     props.setEmail(email)
                     props.setPassword(password)
-                    props.setAuth(true)
+                    props.setAuth({auth: true})
                 }
             } else {
                 setShowMessage(true)

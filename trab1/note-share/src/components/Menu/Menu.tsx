@@ -4,7 +4,7 @@ const Menu = () => {
             id: 1,
             icon: "home",
             name: "Página Inicial",
-            url: "/",
+            url: "/home",
         },
         {
             id: 2,
