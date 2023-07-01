@@ -1,58 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react"
-import axios, {AxiosResponse} from "axios"
 import Message from "../components/Message/Message"
 import "../App.css"
-
-interface LoginResponse {
-    token: string,
-    id: string
-}
-// Axios call
-async function sendLogIn(email: string, password: string) {
-    try {
-        const response = await axios.post<any, AxiosResponse<APILogInResponse>>(
-            'http://progweb.isac.campos.vms.ufsc.br:8080/', 
-            {
-                email: email,
-                password: password
-            }
-        )
-        console.log('sendLogIn response: ', response)
-        if (response.data.accessToken) {
-            const ret: LoginResponse = {
-                token: response.data.accessToken,
-                id: response.data.user_id
-            }
-            return ret
-        }
-        return false
-    } catch(err) {
-        console.log(err)
-        return false
-    }
-}
-
-async function sendSignIn(username: string, email: string, password: string) {
-    try {
-        const response = await axios.post<APIRequest, AxiosResponse<APIInsertUserResponse>>(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/user",
-            {
-                name: username,
-                email: email,
-                password: password
-            }
-        )
-        
-        if (response.status === 200) {
-            return response.data.user_id
-        }
-        return ''
-    } catch(err) {
-        console.log(err)
-        return ''
-    }
-}
-
+import { sendLogIn, sendSignIn } from "../utils/requests";
 
 interface AuthState {
     auth: boolean;
@@ -88,18 +37,15 @@ export default function Login(props: Props) {
     const handleSubmit = () => {
         sendLogIn(email, password).then(response => {
 
-            console.log('handleSubmit response: ', response)
-
             if (typeof(response) === "object") {
                 if (Object.prototype.hasOwnProperty.call(response, 'token')
                 && Object.prototype.hasOwnProperty.call(response, 'id')) {
                     setShowMessage(true)
                     setMsgState('success')
                     setMsgStr('Log In successful')
-                    console.log('Token setado em login: ', response.token)
+                    
                     props.setToken(response.token)
                     props.setUID(response.id)
-
                     props.setUserName(username)
                     props.setEmail(email)
                     props.setPassword(password)
@@ -131,11 +77,12 @@ export default function Login(props: Props) {
             setShowMessage(true)
             setMsgState('success')
             setMsgStr('Sign In successful')
-            console.log('Recebeu token sign in: ', id)
+
             props.setEmail(email)
             props.setUserName(username)
             props.setPassword(password)
             props.setUID(id)
+
         }).catch(error => {
             setShowMessage(true)
             setMsgState('danger')

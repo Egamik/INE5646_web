@@ -1,60 +1,7 @@
-import axios from "axios";
 import { useState } from "react";
 import Message from "../Message/Message";
-
-// Requisicao para deletar nota
-async function deleteNote(groupID: string, token: string) {
-    try {
-        const options = {
-            data: {
-                accessToken: token,
-                group_id: groupID
-            }
-        }
-        const response = await axios.delete(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
-            options
-        )
-        if (response.status === 200) {
-            return true
-        }
-        return false
-    } catch (err) {
-        console.log(err)
-        return false
-    }
-}
-
-// Requisicao para editar notas
-async function editNote(title: string, content: string,
-    groupID: string, noteID: string, token: string) 
-    {
-    try {
-        const response = await axios.put(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
-            {
-                group_id: groupID,
-                accessToken: token,
-                note: {
-                    title: title,
-                    content: content,
-                    status: "",
-                    _id: noteID
-                }
-            }
-        )
-        if (response.status === 200) {
-            return 0
-        }
-        if (response.status === 204) {
-            return 1
-        }
-        return 2
-    } catch (error) {
-        console.log(error)
-        return 2
-    }
-}
+import '../../utils/requests'
+import { deleteNote, editNote } from "../../utils/requests";
 
 interface NoteProps {
     token: string,

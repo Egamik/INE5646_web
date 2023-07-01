@@ -1,37 +1,20 @@
-import axios from "axios";
 import React, { useState } from "react";
 import Message from "../Message/Message";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from '@fortawesome/free-solid-svg-icons';
-
-async function requestAddNote(title: string, content: string) {
-    try {
-        const response = await axios.post<APIInsertNoteRequest, any>(
-            "http://progweb.isac.campos.vms.ufsc.br:8080/note",
-            // Ta errado passar pra constante com data
-            {
-                title: title,
-                content: content,
-                status: ""
-            }
-        )
-        if (response.status == 200) {
-            return true
-        }
-        // Falta checar response
-        return false
-    } catch (error) {
-        console.log('error')
-        return false
-    }
-}
-
+import { requestAddNote } from "../../utils/requests";
 
 interface AddNoteProps {
     userToken: string,
+    userID: string,
     setShow: () => void
 }
 
+/**
+ * Componente popup para adicao de novas notas
+ * @param props 
+ * @returns 
+ */
 const AddNote = (props: AddNoteProps) => {
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
@@ -47,10 +30,10 @@ const AddNote = (props: AddNoteProps) => {
         setContent(event.target.value);
     };
 
+    // Seta parametros para mensagem para usuario
     const handleAddNote = () => {
-        requestAddNote(title, content).then(result => {
-            if (result === true) {
-                // carregar mensagem de sucesso
+        requestAddNote(title, content, props.userToken, "", props.userID).then(result => {
+            if (typeof(result) === 'string') {
                 setMessageState("success")
                 setMessageStr("Note added successfully!")
                 setShowMessage(true)

@@ -23,6 +23,10 @@ declare namespace JSX {
 
 }
 
+interface TokenState {
+    token: string
+}
+
 interface Note {
     _id: string
     title: string,
@@ -35,6 +39,16 @@ interface APIResponse {
     name: string,
     notes: Note[],
     __v: number
+}
+
+interface LoginResponse {
+    token: string,
+    id: string
+}
+
+interface LoginResponse {
+    token: string,
+    id: string
 }
 
 interface APIDefaultResponse {
@@ -102,6 +116,11 @@ interface APIInsertGroupRequest {
     name: string,
     notes: Note[],
     users_ids: string[],
+    group_id: string
+}
+
+interface APIInsertGroupResponse {
+    msg: string,
     group_id: string
 }
 

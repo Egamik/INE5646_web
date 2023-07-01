@@ -20,21 +20,32 @@ interface AuthState {
 }
 
 export default function App() {
-    const [token, setToken] = useState<string>('')
-    const [uID, setUID] = useState<string>('')
-    const [userName, setUserName] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
-    const [email, setEmail] = useState<string>('')
+    const [token, setToken] = useState<TokenState>(()=> {
+        const storedToken = localStorage.getItem('token')
+        return storedToken ? JSON.parse(storedToken): ''
+
+    })
+    const [uID, setUID] = useState<string>(() => {
+        const storedUID = localStorage.getItem('userID')
+        return storedUID ? storedUID : ''
+    })
     const [auth, setAuth] = useState<AuthState>(() => {
         // Retrieve authentication state from localStorage
         const storedAuth = localStorage.getItem("auth");
         return storedAuth ? JSON.parse(storedAuth) : { auth: false };
     });
+    const [userName, setUserName] = useState<string>()
+    const [password, setPassword] = useState<string>()
+    const [email, setEmail] = useState<string>()
 
     useEffect(() => {
         // Update localStorage when auth state changes
         localStorage.setItem("auth", JSON.stringify(auth));
     }, [auth]);
+
+    useEffect(()=> {
+        localStorage.setItem('token', JSON.stringify(token))
+    }, [token])
     
     if (!auth.auth) {
         return (
@@ -48,7 +59,7 @@ export default function App() {
             />
         )
     } 
-    
+    console.log('App token', token)
     
     return (
         <Router>
