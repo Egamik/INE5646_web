@@ -1,13 +1,18 @@
 # INE5646_web
 Implementacao app gerenciamento de tarefas
+Isac Campos (17200449)  Vitor Egami (18200443)
+
+## Links de acesso
+- Backend: http://progweb.isac.campos.vms.ufsc.br:8080/
+- Frontend: http://progweb.isac.campos.vms.ufsc.br:80/
 
 ## Requisitos
   - A aplicação é acessível apenas após autenticação 	
   - Cadastro de novos usuários
   - Quando autenticado, o usuário deve poder atualizar seu cadastro
   - Base de dados no back-end
-  - [X] Deve ser possível compartilhar dados entre usuários
-  - [X] O front-end deve ser responsivo (desktop e mobile)
+  - Deve ser possível compartilhar dados entre usuários
+  - O front-end deve ser responsivo (desktop e mobile)
   - A aplicação deve ficar disponível 24/7 em algum servidor
 
 
@@ -31,3 +36,7 @@ Implementacao app gerenciamento de tarefas
     - Permite cadastro de novos usuarios
     - Permite log in de usuarios cadastrados
     - Outras paginas so serao renderizadas apos log in
+
+  - Pagina UpdateUser
+    - Possui campos de input para edicao do usuario
+      - Inputs possuem valores atuais como placeholders

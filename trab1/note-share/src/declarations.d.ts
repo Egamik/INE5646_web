@@ -27,6 +27,14 @@ interface TokenState {
     token: string
 }
 
+interface UIDState {
+    user_id: string
+}
+
+interface AuthState {
+    auth: boolean;
+}
+
 interface Note {
     _id: string
     title: string,

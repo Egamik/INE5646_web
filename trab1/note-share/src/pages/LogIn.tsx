@@ -10,8 +10,8 @@ interface AuthState {
 // Funcoes setState herdadas
 // Usado para passar parametros para contexto do App
 type Props = {
-    setToken: React.Dispatch<React.SetStateAction<string>>,
-    setUID: React.Dispatch<React.SetStateAction<string>>,
+    setToken: React.Dispatch<React.SetStateAction<TokenState>>,
+    setUID: React.Dispatch<React.SetStateAction<UIDState>>,
     setAuth: React.Dispatch<React.SetStateAction<AuthState>>
     setUserName: React.Dispatch<React.SetStateAction<string>>,
     setEmail: React.Dispatch<React.SetStateAction<string>>,
@@ -44,8 +44,8 @@ export default function Login(props: Props) {
                     setMsgState('success')
                     setMsgStr('Log In successful')
                     
-                    props.setToken(response.token)
-                    props.setUID(response.id)
+                    props.setToken({token: response.token})
+                    props.setUID({user_id: response.id})
                     props.setUserName(username)
                     props.setEmail(email)
                     props.setPassword(password)
@@ -81,7 +81,7 @@ export default function Login(props: Props) {
             props.setEmail(email)
             props.setUserName(username)
             props.setPassword(password)
-            props.setUID(id)
+            props.setUID({user_id: id})
 
         }).catch(error => {
             setShowMessage(true)

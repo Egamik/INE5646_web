@@ -139,7 +139,7 @@ export async function getUserGroups(token: string, uid: string) {
         }
         return []
     } catch (error) {
-        console.log('Error em getUserGroups MainPage', error)
+        // console.log('Error em getUserGroups MainPage', error)
         return []
     }
 }

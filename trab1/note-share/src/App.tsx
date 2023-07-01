@@ -15,19 +15,16 @@ import Login from "./pages/LogIn.tsx"
 import MainPage from "./pages/MainPage.tsx"
 import UpdateUser from "./pages/UpdateUser.tsx"
 
-interface AuthState {
-    auth: boolean;
-}
-
 export default function App() {
+    // Salva token em cache do navegador
     const [token, setToken] = useState<TokenState>(()=> {
         const storedToken = localStorage.getItem('token')
         return storedToken ? JSON.parse(storedToken): ''
 
     })
-    const [uID, setUID] = useState<string>(() => {
-        const storedUID = localStorage.getItem('userID')
-        return storedUID ? storedUID : ''
+    const [uID, setUID] = useState<UIDState>(() => {
+        const storedUID = localStorage.getItem('user_id')
+        return storedUID ? JSON.parse(storedUID) : ''
     })
     const [auth, setAuth] = useState<AuthState>(() => {
         // Retrieve authentication state from localStorage
@@ -39,13 +36,19 @@ export default function App() {
     const [email, setEmail] = useState<string>()
 
     useEffect(() => {
-        // Update localStorage when auth state changes
+        // Update localStorage quando ha mudanca em auth
         localStorage.setItem("auth", JSON.stringify(auth));
     }, [auth]);
 
     useEffect(()=> {
+        // Update localStorage quando ha mudanca em auth
         localStorage.setItem('token', JSON.stringify(token))
     }, [token])
+
+    useEffect(() => {
+        // Update localStorage quando ha mudanca em auth
+        localStorage.setItem("user_id", JSON.stringify(uID));
+    }, [uID]);
     
     if (!auth.auth) {
         return (
@@ -79,8 +82,8 @@ export default function App() {
                                         path="/"
                                         element={
                                             <MainPage 
-                                                token={token} 
-                                                userID={uID}
+                                                token={token.token} 
+                                                userID={uID.user_id}
                                             />
                                         }
                                         errorElement={<></>}

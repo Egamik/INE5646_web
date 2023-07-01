@@ -28,7 +28,7 @@ const MainPage = (props: MainPageProps) => {
 
     // Pega notas do servidor antes de renderizar
     useEffect(() => {
-        console.log('Use effect de MainPage: ', props);
+        console.log('Use effect de MainPage: ', JSON.stringify(props));
         // Pegar groupID do user antes
         getUserGroups(props.token, props.userID)
             .then((result) => {
@@ -59,7 +59,7 @@ const MainPage = (props: MainPageProps) => {
     const closePopUp = () => {
         setShowAddNote(false)
     }
-    // Gera componentes filhos
+    // Gera componentes filhos dinamicamente
     const generateItems = (notes: APIResponse["notes"], token: string): JSX.Element[] => {
         const result: JSX.Element[] = []
         notes.forEach(note => {
