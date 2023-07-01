@@ -5,6 +5,7 @@ Isac Campos (17200449)  Vitor Egami (18200443)
 ## Links de acesso
 - Backend: http://progweb.isac.campos.vms.ufsc.br:8080/
 - Frontend: http://progweb.isac.campos.vms.ufsc.br:80/
+- Repositorio: https://github.com/Egamik/INE5646_web
 
 ## Requisitos
   - A aplicação é acessível apenas após autenticação 	
